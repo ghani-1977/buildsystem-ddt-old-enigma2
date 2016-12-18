@@ -8,24 +8,41 @@ export CONFIG_SITE
 CCACHE_DIR            = $(HOME)/.ccache-ddt
 export CCACHE_DIR
 
-BASE_DIR             := $(shell cd .. && pwd)
+BASE_DIR             := $(shell pwd)
 
 ARCHIVE               = $(HOME)/Archive
 APPS_DIR              = $(BASE_DIR)/apps
 BUILD_TMP             = $(BASE_DIR)/build_tmp
-CDK_DIR               = $(BASE_DIR)/cdk_new
 DRIVER_DIR            = $(BASE_DIR)/driver
 FLASH_DIR             = $(BASE_DIR)/flash
 SOURCE_DIR            = $(BASE_DIR)/source
 
--include $(CDK_DIR)/config
+-include $(BASE_DIR)/config
 
 # for local extensions, e.g. LOCAL_NEUTRINO_DEPS
--include $(CDK_DIR)/config.local
+-include $(BASE_DIR)/config.local
 
 # default platform...
 TARGET               ?= sh4-linux
 BOXARCH              ?= sh4
+
+
+GIT_PROTOCOL         ?= http
+ifneq ($(GIT_PROTOCOL), http)
+GITHUB               ?= git://github.com
+else
+GITHUB               ?= https://github.com
+endif
+GIT_NAME             ?= Duckbox-Developers
+GIT_NAME_DRIVER      ?= Duckbox-Developers
+GIT_NAME_APPS        ?= Duckbox-Developers
+GIT_NAME_FLASH       ?= Duckbox-Developers
+
+ifneq ($(GIT_STASH_PULL), stashpull)
+GIT_PULL              = git pull
+else
+GIT_PULL              = git stash && git stash show -p stash@{0} > ./pull-stash.patch || true && git pull && git stash pop || true
+endif
 
 BOOT_DIR              = $(BASE_DIR)/tufsbox/cdkroot-tftpboot
 CROSS_BASE            = $(BASE_DIR)/tufsbox/cross
@@ -37,11 +54,12 @@ RELEASE_DIR           = $(BASE_DIR)/tufsbox/release
 PKGPREFIX             = $(BUILD_TMP)/pkg
 TARGETPREFIX          = $(BASE_DIR)/tufsbox/cdkroot
 
-CUSTOM_DIR            = $(CDK_DIR)/custom
-SCRIPTS_DIR           = $(CDK_DIR)/scripts
-PATCHES               = $(CDK_DIR)/Patches
-SKEL_ROOT             = $(CDK_DIR)/root
-D                     = $(CDK_DIR)/.deps
+CUSTOM_DIR            = $(BASE_DIR)/custom
+OWN_BUILD             = $(BASE_DIR)/own_build
+PATCHES               = $(BASE_DIR)/Patches
+SCRIPTS_DIR           = $(BASE_DIR)/scripts
+SKEL_ROOT             = $(BASE_DIR)/root
+D                     = $(BASE_DIR)/.deps
 # backwards compatibility
 DEPDIR                = $(D)
 
@@ -78,6 +96,23 @@ VPATH                 = $(D)
 
 PATH                 := $(HOSTPREFIX)/bin:$(CROSS_DIR)/bin:$(PATH):/sbin:/usr/sbin:/usr/local/sbin
 
+TERM_BOLD            := $(shell tput smso 2>/dev/null)
+TERM_RESET           := $(shell tput rmso 2>/dev/null)
+
+# Adjust according to the number CPU cores to use for parallel build.
+# Default: Number of processors in /proc/cpuinfo, if present, or 1.
+NR_CPU               := $(shell [ -f /proc/cpuinfo ] && grep -c '^processor\s*:' /proc/cpuinfo || echo 1)
+PARALLEL_MAKE        ?= -j $(NR_CPU)
+MAKEFLAGS            += $(PARALLEL_MAKE)
+MAKEFLAGS            += --no-print-directory
+ifndef VERBOSE
+VERBOSE               = 1
+endif
+ifeq ($(VERBOSE), 1)
+MAKEFLAGS            += --silent
+CONFIGURE_SILENT      = -q
+endif
+
 PKG_CONFIG            = $(HOSTPREFIX)/bin/$(TARGET)-pkg-config
 PKG_CONFIG_PATH       = $(TARGETPREFIX)/usr/lib/pkgconfig
 
@@ -95,6 +130,31 @@ UNTAR                 = tar -C $(BUILD_TMP) -xf $(ARCHIVE)
 REMOVE                = rm -rf $(BUILD_TMP)
 RM_PKGPREFIX          = rm -rf $(PKGPREFIX)
 PATCH                 = patch -p1 -i $(PATCHES)
+APATCH                = patch -p1 -i
+START_BUILD           = @echo "=============================================================="; echo; echo -e " $(TERM_BOLD) Start build of $(subst $(BASE_DIR)/.deps/,,$@). $(TERM_RESET)"
+TOUCH                 = @touch $@; echo -e " $(TERM_BOLD) Build of $(subst $(BASE_DIR)/.deps/,,$@) completed. $(TERM_RESET)"; echo
+
+define post_patch
+	for i in $(1); do \
+		if [ -d $$i ] ; then \
+			for p in $$i/*; do \
+				if [ $${p:0:1} == "/" ]; then \
+					echo -e "==> \033[31mApplying Patch:\033[0m $$p"; $(APATCH) $$p; \
+				else \
+					echo -e "==> \033[31mApplying Patch:\033[0m $$p"; $(PATCH)/$$p; \
+				fi; \
+			done; \
+		else \
+			if [ $${i:0:1} == "/" ]; then \
+				echo -e "==> \033[31mApplying Patch:\033[0m $$i"; $(APATCH) $$i; \
+			else \
+				echo -e "==> \033[31mApplying Patch:\033[0m $$i"; $(PATCH)/$$i; \
+			fi; \
+		fi; \
+	done; \
+	echo -e "Patch of \033[01;32m$(subst $(BASE_DIR)/.deps/,,$@)\033[0m completed."; \
+	echo
+endef
 
 #
 #
@@ -110,15 +170,16 @@ OPKG_SH = $(OPKG_SH_ENV) opkg.sh
 # wget tarballs into archive directory
 WGET = wget --progress=bar:force --no-check-certificate -t6 -T20 -c -P $(ARCHIVE)
 
-TUXBOX_YAUD_CUSTOMIZE = [ -x $(CUSTOM_DIR)/$(notdir $@)-local.sh ] && KERNEL_VERSION=$(KERNEL_VERSION) && BOXTYPE=$(BOXTYPE) && $(CUSTOM_DIR)/$(notdir $@)-local.sh $(RELEASE_DIR) $(TARGETPREFIX) $(CDK_DIR) $(SOURCE_DIR) $(FLASH_DIR) $(BOXTYPE) || true
-TUXBOX_CUSTOMIZE      = [ -x $(CUSTOM_DIR)/$(notdir $@)-local.sh ] && KERNEL_VERSION=$(KERNEL_VERSION) && BOXTYPE=$(BOXTYPE) && $(CUSTOM_DIR)/$(notdir $@)-local.sh $(RELEASE_DIR) $(TARGETPREFIX) $(CDK_DIR) $(BOXTYPE) || true
+TUXBOX_YAUD_CUSTOMIZE = [ -x $(CUSTOM_DIR)/$(notdir $@)-local.sh ] && KERNEL_VERSION=$(KERNEL_VERSION) && BOXTYPE=$(BOXTYPE) && $(CUSTOM_DIR)/$(notdir $@)-local.sh $(RELEASE_DIR) $(TARGETPREFIX) $(BASE_DIR) $(SOURCE_DIR) $(FLASH_DIR) $(BOXTYPE) || true
+TUXBOX_CUSTOMIZE      = [ -x $(CUSTOM_DIR)/$(notdir $@)-local.sh ] && KERNEL_VERSION=$(KERNEL_VERSION) && BOXTYPE=$(BOXTYPE) && $(CUSTOM_DIR)/$(notdir $@)-local.sh $(RELEASE_DIR) $(TARGETPREFIX) $(BASE_DIR) $(BOXTYPE) || true
 
 #
 #
 #
 CONFIGURE_OPTS = \
 	--build=$(BUILD) \
-	--host=$(TARGET)
+	--host=$(TARGET) \
+	$(CONFIGURE_SILENT)
 
 BUILDENV = \
 	CC=$(TARGET)-gcc \
@@ -181,12 +242,12 @@ P0217                  = p0217
 endif
 
 split_version=$(subst _, ,$(1))
-KERNEL_UPSTREAM    =$(word 1,$(call split_version,$(KERNEL_VERSION)))
-KERNEL_STM        :=$(word 2,$(call split_version,$(KERNEL_VERSION)))
-KERNEL_LABEL      :=$(word 3,$(call split_version,$(KERNEL_VERSION)))
-KERNEL_RELEASE    :=$(subst ^0,,^$(KERNEL_LABEL))
-KERNEL_STM_LABEL  := _$(KERNEL_STM)_$(KERNEL_LABEL)
-KERNEL_DIR         =$(BUILD_TMP)/linux-sh4-$(KERNEL_VERSION)
+KERNEL_UPSTREAM        =$(word 1,$(call split_version,$(KERNEL_VERSION)))
+KERNEL_STM            :=$(word 2,$(call split_version,$(KERNEL_VERSION)))
+KERNEL_LABEL          :=$(word 3,$(call split_version,$(KERNEL_VERSION)))
+KERNEL_RELEASE        :=$(subst ^0,,^$(KERNEL_LABEL))
+KERNEL_STM_LABEL      := _$(KERNEL_STM)_$(KERNEL_LABEL)
+KERNEL_DIR             =$(BUILD_TMP)/linux-sh4-$(KERNEL_VERSION)
 
 #
 # image
@@ -273,11 +334,11 @@ PLATFORM_CPPFLAGS += -DPLATFORM_UFS922
 DRIVER_PLATFORM   += UFS922=ufs922
 E_CONFIG_OPTS     += --enable-ufs922
 endif
-ifeq ($(BOXTYPE), ufs960)
+ifeq ($(BOXTYPE), ufc960)
 KERNEL_PATCHES_24  = $(UFC960_PATCHES_24)
-PLATFORM_CPPFLAGS += -DPLATFORM_UFS960
-DRIVER_PLATFORM   += UFC960=ufs960
-E_CONFIG_OPTS     += --enable-ufs960
+PLATFORM_CPPFLAGS += -DPLATFORM_UFC960
+DRIVER_PLATFORM   += UFC960=ufc960
+E_CONFIG_OPTS     += --enable-ufc960
 endif
 ifeq ($(BOXTYPE), tf7700)
 KERNEL_PATCHES_24  = $(TF7700_PATCHES_24)

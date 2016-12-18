@@ -1,6 +1,6 @@
 --- Python-2.7.9.orig/Lib/distutils/sysconfig.py
 +++ Python-2.7.9/Lib/distutils/sysconfig.py
-@@ -394,12 +394,66 @@ _config_vars = None
+@@ -394,12 +394,66 @@
  
  def _init_posix():
      """Initialize the module as appropriate for POSIX systems."""

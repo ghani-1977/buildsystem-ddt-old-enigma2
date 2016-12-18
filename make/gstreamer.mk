@@ -1,33 +1,37 @@
 #
 # gstreamer
 #
-GSTREAMER_VER = 1.8.0
+GSTREAMER_VER = 1.10.1
+GSTREAMER_PATCH  = gstreamer-$(GSTREAMER_VER)-fix-crash-with-gst-inspect.patch
+GSTREAMER_PATCH += gstreamer-$(GSTREAMER_VER)-revert-use-new-gst-adapter-get-buffer.patch
 
 $(ARCHIVE)/gstreamer-$(GSTREAMER_VER).tar.xz:
 	$(WGET) http://gstreamer.freedesktop.org/src/gstreamer/gstreamer-$(GSTREAMER_VER).tar.xz
 
-$(D)/gstreamer: $(D)/bootstrap $(D)/glib2 $(D)/libxml2_e2 $(D)/glibnetworking $(ARCHIVE)/gstreamer-$(GSTREAMER_VER).tar.xz
+$(D)/gstreamer: $(D)/bootstrap $(D)/glib2 $(D)/libxml2_e2 $(D)/glib-networking $(ARCHIVE)/gstreamer-$(GSTREAMER_VER).tar.xz
+	$(START_BUILD)
 	$(REMOVE)/gstreamer-$(GSTREAMER_VER)
 	$(UNTAR)/gstreamer-$(GSTREAMER_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/gstreamer-$(GSTREAMER_VER); \
-		$(PATCH)/gstreamer-1.0-fix-crash-with-gst-inspect.patch; \
-		$(PATCH)/gstreamer-1.0-revert-use-new-gst-adapter-get-buffer.patch; \
+		$(call post_patch,$(GSTREAMER_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
 			--libexecdir=/usr/lib \
-			--disable-gtk-doc \
-			--disable-docbook \
+			--datarootdir=/.remove \
 			--disable-dependency-tracking \
 			--disable-check \
 			--disable-gst-debug \
 			--disable-examples \
+			--disable-benchmarks \
 			--disable-tests \
 			--disable-debug \
+			--disable-docbook \
 			--disable-gtk-doc \
 			--disable-gtk-doc-html \
 			--disable-gtk-doc-pdf \
 			--enable-introspection=no \
-			ac_cv_func_register_printf_function=no \
+			ac_cv_header_valgrind_valgrind_h=no \
+			ac_cv_header_sys_poll_h=no \
 		; \
 		$(MAKE); \
 		$(MAKE) install DESTDIR=$(TARGETPREFIX)
@@ -43,27 +47,29 @@ $(D)/gstreamer: $(D)/bootstrap $(D)/glib2 $(D)/libxml2_e2 $(D)/glibnetworking $(
 	$(REWRITE_LIBTOOLDEP)/libgstcontroller-1.0.la
 	$(REWRITE_LIBTOOLDEP)/libgstnet-1.0.la
 	$(REMOVE)/gstreamer-$(GSTREAMER_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gst_plugins_base
 #
 GSTREAMER_BASE_VER = $(GSTREAMER_VER)
+GSTREAMER_BASE_PATCH  = gst-plugins-base-$(GSTREAMER_BASE_VER)-riff-media-added-fourcc-to-all-mpeg4-video-caps.patch
+GSTREAMER_BASE_PATCH += gst-plugins-base-$(GSTREAMER_BASE_VER)-riff-media-added-fourcc-to-all-ffmpeg-mpeg4-video-ca.patch
+GSTREAMER_BASE_PATCH += gst-plugins-base-$(GSTREAMER_BASE_VER)-subparse-avoid-false-negatives-dealing-with-UTF-8.patch
+GSTREAMER_BASE_PATCH += gst-plugins-base-$(GSTREAMER_BASE_VER)-taglist-not-send-to-down-stream-if-all-the-frame-cor.patch
 
 $(ARCHIVE)/gst-plugins-base-$(GSTREAMER_BASE_VER).tar.xz:
 	$(WGET) http://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-$(GSTREAMER_BASE_VER).tar.xz
 
-$(D)/gst_plugins_base: $(D)/bootstrap $(D)/glib2 $(D)/orc $(D)/gstreamer $(D)/libogg $(D)/alsa-lib $(ARCHIVE)/gst-plugins-base-$(GSTREAMER_BASE_VER).tar.xz
+$(D)/gst_plugins_base: $(D)/bootstrap $(D)/glib2 $(D)/orc $(D)/gstreamer $(D)/alsa-lib $(D)/libogg $(D)/libvorbis $(ARCHIVE)/gst-plugins-base-$(GSTREAMER_BASE_VER).tar.xz
+	$(START_BUILD)
 	$(REMOVE)/gst-plugins-base-$(GSTREAMER_BASE_VER)
 	$(UNTAR)/gst-plugins-base-$(GSTREAMER_BASE_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/gst-plugins-base-$(GSTREAMER_BASE_VER); \
-		$(PATCH)/gst-1.0-plugins-base-get-caps-from-src-pad-when-query-caps.patch; \
-		$(PATCH)/gst-1.0-plugins-base-riff-media-added-fourcc-to-all-mpeg4-video-caps.patch; \
-		$(PATCH)/gst-1.0-plugins-base-riff-media-added-fourcc-to-all-ffmpeg-mpeg4-video-ca.patch; \
-		$(PATCH)/gst-1.0-plugins-base-subparse-avoid-false-negatives-dealing-with-UTF-8.patch; \
-		$(PATCH)/gst-1.0-plugins-base-taglist-not-send-to-down-stream-if-all-the-frame-cor.patch; \
+		$(call post_patch,$(GSTREAMER_BASE_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
+			--datarootdir=/.remove \
 			--disable-libvisual \
 			--disable-valgrind \
 			--disable-debug \
@@ -112,23 +118,26 @@ $(D)/gst_plugins_base: $(D)/bootstrap $(D)/glib2 $(D)/orc $(D)/gstreamer $(D)/li
 	$(REWRITE_LIBTOOLDEP)/libgsttag-1.0.la
 	$(REWRITE_LIBTOOLDEP)/libgstvideo-1.0.la
 	$(REMOVE)/gst-plugins-base-$(GSTREAMER_BASE_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gst_plugins_good
 #
 GSTREAMER_GOOD_VER = $(GSTREAMER_VER)
+GSTREAMER_GOOD_PATCH  =
 
 $(ARCHIVE)/gst-plugins-good-$(GSTREAMER_GOOD_VER).tar.xz:
 	$(WGET) http://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-$(GSTREAMER_GOOD_VER).tar.xz
 
 $(D)/gst_plugins_good: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(D)/libsoup $(D)/libflac $(ARCHIVE)/gst-plugins-good-$(GSTREAMER_GOOD_VER).tar.xz
+	$(START_BUILD)
 	$(REMOVE)/gst-plugins-good-$(GSTREAMER_GOOD_VER)
 	$(UNTAR)/gst-plugins-good-$(GSTREAMER_GOOD_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/gst-plugins-good-$(GSTREAMER_GOOD_VER); \
-		$(PATCH)/gst-1.0-plugins-good-gstrtpmp4gpay-set-dafault-value-for-MPEG4-without-co.patch; \
+		$(call post_patch,$(GSTREAMER_GOOD_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
+			--datarootdir=/.remove \
 			--enable-oss \
 			--enable-gst_v4l2 \
 			--without-libv4l2 \
@@ -143,28 +152,33 @@ $(D)/gst_plugins_good: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(D)/
 	for i in `cd $(TARGETPREFIX)/usr/lib/gstreamer-1.0; echo *.la`; do \
 		$(REWRITE_LIBTOOL)/gstreamer-1.0/$$i; done
 	$(REMOVE)/gst-plugins-good-$(GSTREAMER_GOOD_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gst_plugins_bad
 #
 GSTREAMER_BAD_VER = $(GSTREAMER_VER)
+GSTREAMER_BAD_PATCH  = gst-plugins-bad-$(GSTREAMER_BAD_VER)-hls-use-max-playlist-quality.patch
+GSTREAMER_BAD_PATCH += gst-plugins-bad-$(GSTREAMER_BAD_VER)-rtmp-fix-seeking-and-potential-segfault.patch
+GSTREAMER_BAD_PATCH += gst-plugins-bad-$(GSTREAMER_BAD_VER)-mpegtsdemux-only-wait-for-PCR-when-PCR-pid.patch
+GSTREAMER_BAD_PATCH += gst-plugins-bad-$(GSTREAMER_BAD_VER)-dvbapi5-fix-old-kernel.patch
 
 $(ARCHIVE)/gst-plugins-bad-$(GSTREAMER_BAD_VER).tar.xz:
 	$(WGET) http://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-$(GSTREAMER_BAD_VER).tar.xz
 
-$(D)/gst_plugins_bad: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base libmodplug $(ARCHIVE)/gst-plugins-bad-$(GSTREAMER_BAD_VER).tar.xz
+$(D)/gst_plugins_bad: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(ARCHIVE)/gst-plugins-bad-$(GSTREAMER_BAD_VER).tar.xz
+	$(START_BUILD)
 	$(REMOVE)/gst-plugins-bad-$(GSTREAMER_BAD_VER)
 	$(UNTAR)/gst-plugins-bad-$(GSTREAMER_BAD_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/gst-plugins-bad-$(GSTREAMER_BAD_VER); \
-		$(PATCH)/gst-1.0-plugins-bad-fix-compile-error.patch; \
-		$(PATCH)/gst-1.0-plugins-bad-rtmp-fix-seeking-and-potential-segfault.patch; \
+		$(call post_patch,$(GSTREAMER_BAD_PATCH)); \
 		$(BUILDENV) \
 		autoreconf --force --install; \
-		./configure \
+		./configure $(CONFIGURE_SILENT) \
 			--build=$(BUILD) \
 			--host=$(TARGET) \
 			--prefix=/usr \
+			--datarootdir=/.remove \
 			--disable-gtk-doc \
 			--disable-gtk-doc-html \
 			--disable-gtk-doc-pdf \
@@ -215,6 +229,7 @@ $(D)/gst_plugins_bad: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base libmod
 			--disable-voaacenc \
 			--disable-voamrwbenc \
 			--disable-wasapi \
+			--disable-wayland \
 			--disable-wildmidi \
 			--disable-wininet \
 			--disable-winscreencap \
@@ -251,22 +266,26 @@ $(D)/gst_plugins_bad: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base libmod
 	$(REWRITE_LIBTOOLDEP)/libgstadaptivedemux-1.0.la
 	$(REWRITE_LIBTOOLDEP)/libgstbadvideo-1.0.la
 	$(REMOVE)/gst-plugins-bad-$(GSTREAMER_BAD_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gst_plugins_ugly
 #
 GSTREAMER_UGLY_VER = $(GSTREAMER_VER)
+GSTREAMER_UGLY_PATCH =
 
 $(ARCHIVE)/gst-plugins-ugly-$(GSTREAMER_UGLY_VER).tar.xz:
 	$(WGET) http://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-$(GSTREAMER_UGLY_VER).tar.xz
 
 $(D)/gst_plugins_ugly: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(ARCHIVE)/gst-plugins-ugly-$(GSTREAMER_UGLY_VER).tar.xz
+	$(START_BUILD)
 	$(REMOVE)/gst-plugins-ugly-$(GSTREAMER_UGLY_VER)
 	$(UNTAR)/gst-plugins-ugly-$(GSTREAMER_UGLY_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/gst-plugins-ugly-$(GSTREAMER_UGLY_VER); \
+		$(call post_patch,$(GSTREAMER_UGLY_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
+			--datarootdir=/.remove \
 			--disable-fatal-warnings \
 			--disable-amrnb \
 			--disable-amrwb \
@@ -283,22 +302,24 @@ $(D)/gst_plugins_ugly: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(ARC
 	for i in `cd $(TARGETPREFIX)/usr/lib/gstreamer-1.0; echo *.la`; do \
 		$(REWRITE_LIBTOOL)/gstreamer-1.0/$$i; done
 	$(REMOVE)/gst-plugins-ugly-$(GSTREAMER_UGLY_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gst_libav
 #
 GSTREAMER_LIBAV_VER = $(GSTREAMER_VER)
+GSTREAMER_LIBAV_PATCH  = gst-libav-$(GSTREAMER_LIBAV_VER)-disable-yasm-for-libav-when-disable-yasm.patch
+GSTREAMER_LIBAV_PATCH += gst-libav-$(GSTREAMER_LIBAV_VER)-fix-sh4-compile-gcc48.patch
 
 $(ARCHIVE)/gst-libav-$(GSTREAMER_LIBAV_VER).tar.xz:
 	$(WGET) http://gstreamer.freedesktop.org/src/gst-libav/gst-libav-$(GSTREAMER_LIBAV_VER).tar.xz
 
 $(D)/gst_libav: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(ARCHIVE)/gst-libav-$(GSTREAMER_LIBAV_VER).tar.xz
+	$(START_BUILD)
 	$(REMOVE)/gst-libav-$(GSTREAMER_LIBAV_VER)
 	$(UNTAR)/gst-libav-$(GSTREAMER_LIBAV_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/gst-libav-$(GSTREAMER_LIBAV_VER); \
-		$(PATCH)/gst-1.0-libav-disable-yasm-for-libav-when-disable-yasm.patch; \
-		$(PATCH)/gst-1.0-libav-fix-sh4-compile-gcc48.patch; \
+		$(call post_patch,$(GSTREAMER_LIBAV_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
 			--disable-fatal-warnings \
@@ -340,21 +361,23 @@ $(D)/gst_libav: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(ARCHIVE)/g
 		$(MAKE); \
 		$(MAKE) install DESTDIR=$(TARGETPREFIX)
 	$(REMOVE)/gst-libav-$(GSTREAMER_LIBAV_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gst_plugins_fluendo_mpegdemux
 #
 GSTREAMER_FLUENDO_VER = 0.10.71
+GSTREAMER_FLUENDO_PATCH = gst-plugins-fluendo-$(GSTREAMER_FLUENDO_VER)-mpegdemux.patch
 
 $(ARCHIVE)/gst-fluendo-mpegdemux-$(GSTREAMER_FLUENDO_VER).tar.gz:
 	$(WGET) http://core.fluendo.com/gstreamer/src/gst-fluendo-mpegdemux/gst-fluendo-mpegdemux-$(GSTREAMER_FLUENDO_VER).tar.gz
 
 $(D)/gst_plugins_fluendo_mpegdemux: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(ARCHIVE)/gst-fluendo-mpegdemux-$(GSTREAMER_FLUENDO_VER).tar.gz
+	$(START_BUILD)
 	$(REMOVE)/gst-fluendo-mpegdemux-$(GSTREAMER_FLUENDO_VER)
 	$(UNTAR)/gst-fluendo-mpegdemux-$(GSTREAMER_FLUENDO_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/gst-fluendo-mpegdemux-$(GSTREAMER_FLUENDO_VER); \
-		$(PATCH)/gst-plugins-fluendo-mpegdemux-0.10.71.patch; \
+		$(call post_patch,$(GSTREAMER_FLUENDO_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
 			--with-check=no \
@@ -362,21 +385,23 @@ $(D)/gst_plugins_fluendo_mpegdemux: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugi
 		$(MAKE); \
 		$(MAKE) install DESTDIR=$(TARGETPREFIX)
 	$(REMOVE)/gst-fluendo-mpegdemux-$(GSTREAMER_FLUENDO_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gmediarender
 #
 GSTREAMER_GMEDIARENDER_VER = 0.0.6
+GSTREAMER_GMEDIARENDER_PATCH = gst-gmediarender-$(GSTREAMER_GMEDIARENDER_VER).patch
 
 $(ARCHIVE)/gmediarender-$(GSTREAMER_GMEDIARENDER_VER).tar.bz2:
 	$(WGET) http://savannah.nongnu.org/download/gmrender/gmediarender-$(GSTREAMER_GMEDIARENDER_VER).tar.bz2
 
 $(D)/gst_gmediarender: $(D)/bootstrap $(D)/gst_plugins_dvbmediasink $(D)/libupnp $(ARCHIVE)/gmediarender-$(GSTREAMER_GMEDIARENDER_VER).tar.bz2
+	$(START_BUILD)
 	$(REMOVE)/gmediarender-$(GSTREAMER_GMEDIARENDER_VER)
 	$(UNTAR)/gmediarender-$(GSTREAMER_GMEDIARENDER_VER).tar.bz2
 	set -e; cd $(BUILD_TMP)/gmediarender-$(GSTREAMER_GMEDIARENDER_VER); \
-		$(PATCH)/gst-gmediarender-0.0.6.patch; \
+		$(call post_patch,$(GSTREAMER_GMEDIARENDER_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
 			--with-libupnp=$(TARGETPREFIX)/usr \
@@ -384,21 +409,25 @@ $(D)/gst_gmediarender: $(D)/bootstrap $(D)/gst_plugins_dvbmediasink $(D)/libupnp
 		$(MAKE); \
 		$(MAKE) install DESTDIR=$(TARGETPREFIX)
 	$(REMOVE)/gmediarender-$(GSTREAMER_GMEDIARENDER_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # orc
 #
 ORC_VER = 0.4.24
+ORC_PATCH =
 
 $(ARCHIVE)/orc-$(ORC_VER).tar.xz:
 	$(WGET) http://gstreamer.freedesktop.org/src/orc/orc-$(ORC_VER).tar.xz
 
 $(D)/orc: $(D)/bootstrap $(ARCHIVE)/orc-$(ORC_VER).tar.xz
+	$(START_BUILD)
 	$(REMOVE)/orc-$(ORC_VER)
 	$(UNTAR)/orc-$(ORC_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/orc-$(ORC_VER); \
+		$(call post_patch,$(ORC_PATCH)); \
 		$(CONFIGURE) \
+			--datarootdir=/.remove \
 			--prefix=/usr \
 		; \
 		$(MAKE) all; \
@@ -408,20 +437,23 @@ $(D)/orc: $(D)/bootstrap $(ARCHIVE)/orc-$(ORC_VER).tar.xz
 	$(REWRITE_LIBTOOL)/liborc-test-0.4.la
 	$(REWRITE_LIBTOOLDEP)/liborc-test-0.4.la
 	$(REMOVE)/orc-$(ORC_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # libdca
 #
 LIBDCA_VER = 0.0.5
+LIBDCA_PATCH =
 
 $(ARCHIVE)/libdca-$(LIBDCA_VER).tar.bz2:
 	$(WGET) http://download.videolan.org/pub/videolan/libdca/$(LIBDCA_VER)/libdca-$(LIBDCA_VER).tar.bz2
 
 $(D)/libdca: $(D)/bootstrap $(ARCHIVE)/libdca-$(LIBDCA_VER).tar.bz2
+	$(START_BUILD)
 	$(REMOVE)/libdca-$(LIBDCA_VER)
 	$(UNTAR)/libdca-$(LIBDCA_VER).tar.bz2
 	set -e; cd $(BUILD_TMP)/libdca-$(LIBDCA_VER); \
+		$(call post_patch,$(LIBDCA_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
 		; \
@@ -431,13 +463,16 @@ $(D)/libdca: $(D)/bootstrap $(ARCHIVE)/libdca-$(LIBDCA_VER).tar.bz2
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libdts.pc
 	$(REWRITE_LIBTOOL)/libdca.la
 	$(REMOVE)/libdca-$(LIBDCA_VER)
-	touch $@
+	$(TOUCH)
 
 #
 # gst_plugin_subsink
 #
+GSTREAMER_SUBSINK_VER = $(GSTREAMER_VER)
+GSTREAMER_SUBSINK_PATCH =
 
 $(D)/gst_plugin_subsink: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(D)/gst_plugins_good $(D)/gst_plugins_bad $(D)/gst_plugins_ugly
+	$(START_BUILD)
 	$(REMOVE)/gstreamer1.0-plugin-subsink
 	set -e; if [ -d $(ARCHIVE)/gstreamer1.0-plugin-subsink.git ]; \
 		then cd $(ARCHIVE)/gstreamer1.0-plugin-subsink.git; git pull; \
@@ -445,6 +480,7 @@ $(D)/gst_plugin_subsink: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(D
 		fi
 	cp -ra $(ARCHIVE)/gstreamer1.0-plugin-subsink.git $(BUILD_TMP)/gstreamer1.0-plugin-subsink
 	set -e; cd $(BUILD_TMP)/gstreamer1.0-plugin-subsink; \
+		$(call post_patch,$(GSTREAMER_SUBSINK_PATCH)); \
 		aclocal --force -I m4; \
 		libtoolize --copy --ltdl --force; \
 		autoconf --force; \
@@ -458,12 +494,16 @@ $(D)/gst_plugin_subsink: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(D
 	for i in `cd $(TARGETPREFIX)/usr/lib/gstreamer-1.0; echo *.la`; do \
 		$(REWRITE_LIBTOOL)/gstreamer-1.0/$$i; done
 	$(REMOVE)/gstreamer1.0-plugin-subsink
-	touch $@
+	$(TOUCH)
 
 #
 # gst_plugins_dvbmediasink
 #
+GSTREAMER_SUBSINK_VER = $(GSTREAMER_VER)
+GSTREAMER_DVBMEDIASINK_PATCH =
+
 $(D)/gst_plugins_dvbmediasink: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_base $(D)/gst_plugins_good $(D)/gst_plugins_bad $(D)/gst_plugins_ugly $(D)/gst_plugin_subsink $(D)/libdca
+	$(START_BUILD)
 	$(REMOVE)/gstreamer1.0-plugin-multibox-dvbmediasink
 	set -e; if [ -d $(ARCHIVE)/gstreamer1.0-plugin-multibox-dvbmediasink.git ]; \
 		then cd $(ARCHIVE)/gstreamer1.0-plugin-multibox-dvbmediasink.git; git pull; \
@@ -471,6 +511,7 @@ $(D)/gst_plugins_dvbmediasink: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_ba
 		fi
 	cp -ra $(ARCHIVE)/gstreamer1.0-plugin-multibox-dvbmediasink.git $(BUILD_TMP)/gstreamer1.0-plugin-multibox-dvbmediasink
 	set -e; cd $(BUILD_TMP)/gstreamer1.0-plugin-multibox-dvbmediasink; \
+		$(call post_patch,$(GSTREAMER_DVBMEDIASINK_PATCH)); \
 		aclocal --force -I m4; \
 		libtoolize --copy --force; \
 		autoconf --force; \
@@ -491,4 +532,4 @@ $(D)/gst_plugins_dvbmediasink: $(D)/bootstrap $(D)/gstreamer $(D)/gst_plugins_ba
 	for i in `cd $(TARGETPREFIX)/usr/lib/gstreamer-1.0; echo *.la`; do \
 		$(REWRITE_LIBTOOL)/gstreamer-1.0/$$i; done
 	$(REMOVE)/gstreamer1.0-plugin-multibox-dvbmediasink
-	touch $@
+	$(TOUCH)

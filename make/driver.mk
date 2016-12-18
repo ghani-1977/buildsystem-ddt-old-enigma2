@@ -4,7 +4,6 @@
 driver-clean:
 	$(MAKE) -C $(DRIVER_DIR) ARCH=sh KERNEL_LOCATION=$(KERNEL_DIR) distclean
 	rm -f $(D)/driver
-#	rm -f $(D)/driver-symlink
 
 driver-symlink:
 	set -e; cd $(DRIVER_DIR); \
@@ -28,6 +27,7 @@ driver-symlink:
 	touch $(D)/$(notdir $@)
 
 $(D)/driver: $(DRIVER_DIR)/Makefile $(D)/bootstrap $(D)/linux-kernel
+	$(START_BUILD)
 	$(MAKE) -C $(DRIVER_DIR) ARCH=sh CONFIG_DEBUG_SECTION_MISMATCH=y \
 		CONFIG_MODULES_PATH=$(CROSS_DIR)/target \
 		KERNEL_LOCATION=$(KERNEL_DIR) \
@@ -44,4 +44,4 @@ $(D)/driver: $(DRIVER_DIR)/Makefile $(D)/bootstrap $(D)/linux-kernel
 		INSTALL_MOD_PATH=$(TARGETPREFIX) \
 		install
 	$(DEPMOD) -ae -b $(TARGETPREFIX) -F $(KERNEL_DIR)/System.map -r $(KERNEL_VERSION)
-	touch $@
+	$(TOUCH)

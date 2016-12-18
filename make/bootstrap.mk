@@ -1,3 +1,31 @@
+TOOLCHECK  = find-git find-svn find-gzip find-bzip2 find-patch find-gawk
+TOOLCHECK += find-makeinfo find-automake find-gcc find-libtool
+TOOLCHECK += find-yacc find-flex find-tic find-pkg-config
+TOOLCHECK += find-cmake find-gperf
+
+find-%:
+	@TOOL=$(patsubst find-%,%,$@); \
+		type -p $$TOOL >/dev/null || \
+		{ echo "required tool $$TOOL missing."; false; }
+
+toolcheck: $(TOOLCHECK) preqs
+	@echo "All required tools seem to be installed."
+	@echo
+	@for i in audio_7100 audio_7105 audio_7111 video_7100 video_7105 video_7109 video_7111; do \
+		if [ ! -e $(SKEL_ROOT)/boot/$$i.elf ]; then \
+			echo -e "\n    ERROR: One or more .elf files are missing in $(SKEL_ROOT)/boot!"; \
+			echo "           $$i.elf is one of them"; \
+			echo; \
+			echo "    Correct this and retry."; \
+			echo; \
+		fi; \
+	done
+	@if test "$(subst /bin/,,$(shell readlink /bin/sh))" != bash; then \
+		echo "WARNING: /bin/sh is not linked to bash."; \
+		echo "         This configuration might work, but is not supported."; \
+		echo; \
+	fi
+
 BOOTSTRAP  = directories crosstool $(D)/ccache
 BOOTSTRAP += $(HOSTPREFIX)/bin/opkg.sh
 BOOTSTRAP += $(HOSTPREFIX)/bin/opkg-chksvn.sh
@@ -9,6 +37,24 @@ BOOTSTRAP += $(D)/host_pkgconfig $(D)/host_module_init_tools $(D)/host_mtd_utils
 
 $(D)/bootstrap: $(BOOTSTRAP)
 	touch $@
+
+SYSTEM_TOOLS  = $(D)/module_init_tools
+SYSTEM_TOOLS += $(D)/busybox
+SYSTEM_TOOLS += $(D)/zlib
+SYSTEM_TOOLS += $(D)/sysvinit
+SYSTEM_TOOLS += $(D)/diverse-tools
+SYSTEM_TOOLS += $(D)/e2fsprogs
+SYSTEM_TOOLS += $(D)/jfsutils
+SYSTEM_TOOLS += $(D)/hd-idle
+SYSTEM_TOOLS += $(D)/fbshot
+SYSTEM_TOOLS += $(D)/portmap
+SYSTEM_TOOLS += $(D)/nfs_utils
+SYSTEM_TOOLS += $(D)/vsftpd
+SYSTEM_TOOLS += $(D)/autofs
+SYSTEM_TOOLS += $(D)/driver
+
+$(D)/system-tools: $(SYSTEM_TOOLS) $(TOOLS)
+	$(TOUCH)
 
 $(HOSTPREFIX)/bin/opkg%sh: | directories
 	ln -sf $(SCRIPTS_DIR)/$(shell basename $@) $(HOSTPREFIX)/bin
@@ -40,6 +86,10 @@ $(ARCHIVE)/stlinux24-cross-%.i386.rpm \
 $(ARCHIVE)/stlinux24-sh4-%.noarch.rpm:
 	$(WGET) $(STL_FTP_UPD_SH4)/$(subst $(ARCHIVE)/,"",$@)
 
+#
+# install the RPMs
+#
+
 # 4.6.3
 #BINUTILS_VER  = 2.22-64
 #GCC_VER       = 4.6.3-111
@@ -65,6 +115,43 @@ $(ARCHIVE)/stlinux24-sh4-libgcc-$(LIBGCC_VER).sh4.rpm \
 $(ARCHIVE)/stlinux24-sh4-libstdc++-$(LIBGCC_VER).sh4.rpm \
 $(ARCHIVE)/stlinux24-sh4-libstdc++-dev-$(LIBGCC_VER).sh4.rpm
 	unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/devkit/sh4 $(CROSS_DIR) \
+		$^
+	touch $(D)/$(notdir $@)
+
+crosstool: directories driver-symlink \
+$(HOSTPREFIX)/bin/unpack-rpm.sh \
+crosstool-rpminstall
+	set -e; cd $(CROSS_BASE); rm -f sh4-linux/sys-root; ln -s ../target sh4-linux/sys-root; \
+	if [ -e $(CROSS_DIR)/target/usr/lib/libstdc++.la ]; then \
+		sed -i "s,^libdir=.*,libdir='$(CROSS_DIR)/target/usr/lib'," $(CROSS_DIR)/target/usr/lib/lib{std,sup}c++.la; \
+	fi
+	if test -e $(CROSS_DIR)/target/usr/lib/libstdc++.so; then \
+		cp -a $(CROSS_DIR)/target/usr/lib/libstdc++.s*[!y] $(TARGETPREFIX)/lib; \
+		cp -a $(CROSS_DIR)/target/usr/lib/libdl.so $(TARGETPREFIX)/usr/lib; \
+		cp -a $(CROSS_DIR)/target/usr/lib/libm.so $(TARGETPREFIX)/usr/lib; \
+		cp -a $(CROSS_DIR)/target/usr/lib/librt.so $(TARGETPREFIX)/usr/lib; \
+		cp -a $(CROSS_DIR)/target/usr/lib/libutil.so $(TARGETPREFIX)/usr/lib; \
+		cp -a $(CROSS_DIR)/target/usr/lib/libpthread.so $(TARGETPREFIX)/usr/lib; \
+		cp -a $(CROSS_DIR)/target/usr/lib/libresolv.so $(TARGETPREFIX)/usr/lib; \
+		ln -s $(CROSS_DIR)/target/usr/lib/libc.so $(TARGETPREFIX)/usr/lib/libc.so; \
+		ln -s $(CROSS_DIR)/target/usr/lib/libc_nonshared.a $(TARGETPREFIX)/usr/lib/libc_nonshared.a; \
+	fi
+	if test -e $(CROSS_DIR)/target/lib; then \
+		cp -a $(CROSS_DIR)/target/lib/*so* $(TARGETPREFIX)/lib; \
+	fi
+	if test -e $(CROSS_DIR)/target/sbin/ldconfig; then \
+		cp -a $(CROSS_DIR)/target/sbin/ldconfig $(TARGETPREFIX)/sbin; \
+		cp -a $(CROSS_DIR)/target/etc/ld.so.conf $(TARGETPREFIX)/etc; \
+		cp -a $(CROSS_DIR)/target/etc/host.conf $(TARGETPREFIX)/etc; \
+	fi
+	touch $(D)/$(notdir $@)
+
+#
+# host_u_boot_tools
+#
+host_u_boot_tools: \
+$(ARCHIVE)/stlinux24-host-u-boot-tools-1.3.1_stm24-9.i386.rpm
+	unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/host/bin $(HOSTPREFIX)/bin \
 		$^
 	touch $(D)/$(notdir $@)
 
@@ -107,47 +194,40 @@ crossmenuconfig: $(ARCHIVE)/crosstool-ng-$(CROSSTOOL_NG_VER).tar.xz
 		./configure --enable-local; MAKELEVEL=0 make; chmod 0755 ct-ng; \
 		./ct-ng menuconfig
 
-# install the RPMs
-crosstool: directories driver-symlink \
-$(HOSTPREFIX)/bin/unpack-rpm.sh \
-crosstool-rpminstall
-	set -e; cd $(CROSS_BASE); rm -f sh4-linux/sys-root; ln -s ../target sh4-linux/sys-root; \
-	if [ -e $(CROSS_DIR)/target/usr/lib/libstdc++.la ]; then \
-		sed -i "s,^libdir=.*,libdir='$(CROSS_DIR)/target/usr/lib'," $(CROSS_DIR)/target/usr/lib/lib{std,sup}c++.la; \
-	fi
-	if test -e $(CROSS_DIR)/target/usr/lib/libstdc++.so; then \
-		cp -a $(CROSS_DIR)/target/usr/lib/libstdc++.s*[!y] $(TARGETPREFIX)/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libdl.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libm.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/librt.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libutil.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libpthread.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libresolv.so $(TARGETPREFIX)/usr/lib; \
-		ln -s $(CROSS_DIR)/target/usr/lib/libc.so $(TARGETPREFIX)/usr/lib/libc.so; \
-		ln -s $(CROSS_DIR)/target/usr/lib/libc_nonshared.a $(TARGETPREFIX)/usr/lib/libc_nonshared.a; \
-	fi
-	if test -e $(CROSS_DIR)/target/lib; then \
-		cp -a $(CROSS_DIR)/target/lib/*so* $(TARGETPREFIX)/lib; \
-	fi
-	if test -e $(CROSS_DIR)/target/sbin/ldconfig; then \
-		cp -a $(CROSS_DIR)/target/sbin/ldconfig $(TARGETPREFIX)/sbin; \
-		cp -a $(CROSS_DIR)/target/etc/ld.so.conf $(TARGETPREFIX)/etc; \
-		cp -a $(CROSS_DIR)/target/etc/host.conf $(TARGETPREFIX)/etc; \
-	fi
-	touch $(D)/$(notdir $@)
-
-#
-# host_u_boot_tools
-#
-host_u_boot_tools: \
-$(ARCHIVE)/stlinux24-host-u-boot-tools-1.3.1_stm24-9.i386.rpm
-	unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/host/bin $(HOSTPREFIX)/bin \
-		$^
-	touch $(D)/$(notdir $@)
-
 #
 # directories
 #
+PREQS  = $(DRIVER_DIR)
+PREQS += $(APPS_DIR)
+PREQS += $(FLASH_DIR)
+
+preqs: $(PREQS)
+
+$(DRIVER_DIR):
+	@echo '=============================================================='
+	@echo '      Cloning $(GIT_NAME_DRIVER)-driver git repo                     '
+	@echo '=============================================================='
+	if [ ! -e $(DRIVER_DIR)/.git ]; then \
+		git clone $(GITHUB)/$(GIT_NAME_DRIVER)/driver.git driver; \
+	fi
+
+$(APPS_DIR):
+	@echo '=============================================================='
+	@echo '      Cloning $(GIT_NAME_APPS)-apps git repo                  '
+	@echo '=============================================================='
+	if [ ! -e $(APPS_DIR)/.git ]; then \
+		git clone $(GITHUB)/$(GIT_NAME_APPS)/apps.git apps; \
+	fi
+
+$(FLASH_DIR):
+	@echo '=============================================================='
+	@echo '      Cloning $(GIT_NAME_FLASH)-flash git repo                '
+	@echo '=============================================================='
+	if [ ! -e $(FLASH_DIR)/.git ]; then \
+		git clone $(GITHUB)/$(GIT_NAME_FLASH)/flash-bs.git flash; \
+	fi
+	@echo ''
+
 directories:
 	test -d $(D) || mkdir $(D)
 	test -d $(ARCHIVE) || mkdir $(ARCHIVE)
@@ -196,3 +276,11 @@ $(D)/ccache:
 # hack to make sure they are always copied
 PHONY += ccache bootstrap
 
+#
+# YAUD NONE
+#
+yaud-none: \
+	$(D)/bootstrap \
+	$(D)/linux-kernel \
+	$(D)/system-tools
+	@touch $(D)/$(notdir $@)

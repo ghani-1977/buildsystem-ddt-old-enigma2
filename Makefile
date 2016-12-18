@@ -4,8 +4,8 @@ SHELL = /bin/bash
 UID := $(shell id -u)
 ifeq ($(UID), 0)
 warn:
-	@echo "You are running as root. Don't do this, it's dangerous."
-	@echo "Refusing to build. Good bye."
+	@echo "You are running as root. Do not do this, it is dangerous."
+	@echo "Aborting the build. Goodbye."
 else
 
 include make/buildenv.mk
@@ -18,11 +18,10 @@ include make/buildenv.mk
 printenv:
 	clear
 	@echo '================================================================================'
-	@echo "Build Environment Varibles:"
+	@echo "Build Environment Variables:"
 	@echo "MAINTAINER       : $(MAINTAINER)"
 	@echo "ARCHIVE_DIR      : $(ARCHIVE)"
 	@echo "BASE_DIR         : $(BASE_DIR)"
-	@echo "CDK_DIR          : $(CDK_DIR)"
 	@echo "CUSTOM_DIR       : $(CUSTOM_DIR)"
 	@echo "APPS_DIR         : $(APPS_DIR)"
 	@echo "DRIVER_DIR       : $(DRIVER_DIR)"
@@ -43,20 +42,21 @@ printenv:
 	@echo "PLAYER_VERSION   : $(PLAYER_VER)"
 	@echo "MEDIAFW          : $(MEDIAFW)"
 	@echo "EXTERNAL_LCD     : $(EXTERNAL_LCD)"
+	@echo "CPU_CORES        : $(NR_CPU)"
 	@echo "IMAGE            : $(IMAGE)"
 	@echo '================================================================================'
 ifeq ($(IMAGE), $(filter $(IMAGE), neutrino neutrino-wlandriver))
-	@echo "LOCAL_NEUTRINO_BUILD_OPTIONS :  $(LOCAL_NEUTRINO_BUILD_OPTIONS)"
-	@echo "LOCAL_NEUTRINO_CFLAGS        :  $(LOCAL_NEUTRINO_CFLAGS)"
-	@echo "LOCAL_NEUTRINO_DEPS          :  $(LOCAL_NEUTRINO_DEPS)"
+	@echo "LOCAL_NEUTRINO_BUILD_OPTIONS : $(LOCAL_NEUTRINO_BUILD_OPTIONS)"
+	@echo "LOCAL_NEUTRINO_CFLAGS        : $(LOCAL_NEUTRINO_CFLAGS)"
+	@echo "LOCAL_NEUTRINO_DEPS          : $(LOCAL_NEUTRINO_DEPS)"
 else ifeq ($(IMAGE), $(filter $(IMAGE), enigma2 enigma2-wlandriver))
-	@echo "LOCAL_ENIGMA2_BUILD_OPTIONS  :  $(LOCAL_ENIGMA2_BUILD_OPTIONS)"
-	@echo "LOCAL_ENIGMA2_CPPFLAGS       :  $(LOCAL_ENIGMA2_CPPFLAGS)"
-	@echo "LOCAL_ENIGMA2_DEPS           :  $(LOCAL_ENIGMA2_DEPS)"
+	@echo "LOCAL_ENIGMA2_BUILD_OPTIONS  : $(LOCAL_ENIGMA2_BUILD_OPTIONS)"
+	@echo "LOCAL_ENIGMA2_CPPFLAGS       : $(LOCAL_ENIGMA2_CPPFLAGS)"
+	@echo "LOCAL_ENIGMA2_DEPS           : $(LOCAL_ENIGMA2_DEPS)"
 endif
 	@echo '================================================================================'
 	@echo ""
-	@make --no-print-directory toolcheck
+	@$(MAKE) --no-print-directory toolcheck
 ifeq ($(MAINTAINER),)
 	@echo "##########################################################################"
 	@echo "# The MAINTAINER variable is not set. It defaults to your name from the  #"
@@ -64,27 +64,27 @@ ifeq ($(MAINTAINER),)
 	@echo "##########################################################################"
 	@echo
 endif
-#	@LC_ALL=C make -n preqs|grep -q "Nothing to be done" && P=false || P=true; \
-#	test -d $(TARGETPREFIX) && T=false || T=true; \
-#	type -p $(TARGET)-pkg-config >/dev/null 2>&1 || T=true; \
-#	PATH=$(PATH):$(CROSS_DIR)/bin; \
-#	type -p $(TARGET)-gcc >/dev/null 2>&1 && C=false || C=true; \
-#	if $$P || $$T || $$C; then \
-#		echo "Your next steps are most likely (in this order):"; \
-#		$$P && echo "	* 'make preqs'		for prerequisites"; \
-#		$$C && echo "	* 'make crosstool'	for the cross compiler"; \
-#		$$T && echo "	* 'make bootstrap'	to prepare the target root"; \
-#		echo; \
-#	fi
+
+	@if ! test -e $(BASE_DIR)/config; then \
+		echo;echo "If you want to create or modify the configuration, run './make.sh'"; \
+		echo; fi
 
 help:
 	@echo "a few helpful make targets:"
 	@echo "* make crosstool           - build cross toolchain"
 	@echo "* make bootstrap           - prepares for building"
+	@echo "* make print-targets       - print out all available targets"
+	@echo ""
+	@echo "later, you might find those useful:"
+	@echo "* make update-self         - update the build system"
+	@echo "* make update              - update the build system, apps, driver and flash"
+	@echo ""
+	@echo "cleantargets:"
+	@echo "make clean                 - Clears everything except kernel."
+	@echo "make distclean             - Clears the whole construction."
 	@echo
 
 # define package versions first...
-include make/bootstrap.mk
 include make/contrib-libs.mk
 include make/contrib-apps.mk
 include make/linux-kernel.mk
@@ -101,7 +101,45 @@ include make/neutrino-plugins.mk
 include make/neutrino-release.mk
 include make/cleantargets.mk
 include make/patches.mk
-include make/yaud.mk
+include make/bootstrap.mk
+
+update-self:
+	git pull
+
+update:
+	make distclean
+	@if test -d $(BASE_DIR); then \
+		cd $(BASE_DIR)/; \
+		echo '=============================================================='; \
+		echo '      updating $(GIT_NAME)-cdk git repo                       '; \
+		echo '=============================================================='; \
+		echo; \
+		$(GIT_PULL); fi
+		@echo;
+	@if test -d $(DRIVER_DIR); then \
+		cd $(DRIVER_DIR)/; \
+		echo '=============================================================='; \
+		echo '      updating $(GIT_NAME_DRIVER)-driver git repo             '; \
+		echo '=============================================================='; \
+		echo; \
+		$(GIT_PULL); fi
+		@echo;
+	@if test -d $(APPS_DIR); then \
+		cd $(APPS_DIR)/; \
+		echo '=============================================================='; \
+		echo '      updating $(GIT_NAME_APPS)-apps git repo                 '; \
+		echo '=============================================================='; \
+		echo; \
+		$(GIT_PULL); fi
+		@echo;
+	@if test -d $(FLASH_DIR); then \
+		cd $(FLASH_DIR)/; \
+		echo '=============================================================='; \
+		echo '      updating $(GIT_NAME_FLASH)-flash git repo               '; \
+		echo '=============================================================='; \
+		echo; \
+		$(GIT_PULL); fi
+		@echo;
 
 all:
 	@echo "'make all' is not a valid target. Please read the documentation."
@@ -111,7 +149,7 @@ everything: $(shell sed -n 's/^\$$.D.\/\(.*\):.*/\1/p' make/*.mk)
 
 # print all present targets...
 print-targets:
-	sed -n 's/^\$$.D.\/\(.*\):.*/\1/p; s/^\([a-z].*\):\( \|$$\).*/\1/p;' \
+	@sed -n 's/^\$$.D.\/\(.*\):.*/\1/p; s/^\([a-z].*\):\( \|$$\).*/\1/p;' \
 		`ls -1 make/*.mk|grep -v make/unmaintained.mk` Makefile | \
 		sort -u | fold -s -w 65
 
@@ -126,6 +164,7 @@ print-targets:
 
 PHONY += everything print-targets
 PHONY += all printenv .print-phony
+PHONY += update update-self
 .PHONY: $(PHONY)
 
 # this makes sure we do not build top-level dependencies in parallel

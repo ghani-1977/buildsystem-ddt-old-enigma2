@@ -1,7 +1,10 @@
 #
 # hotplug_e2
 #
+HOTPLUG_E2_PATCH = hotplug-e2-helper.patch
+
 $(D)/hotplug_e2: $(D)/bootstrap
+	$(START_BUILD)
 	$(REMOVE)/hotplug-e2-helper
 	set -e; if [ -d $(ARCHIVE)/hotplug-e2-helper.git ]; \
 		then cd $(ARCHIVE)/hotplug-e2-helper.git; git pull; \
@@ -9,19 +12,22 @@ $(D)/hotplug_e2: $(D)/bootstrap
 		fi
 	cp -ra $(ARCHIVE)/hotplug-e2-helper.git $(BUILD_TMP)/hotplug-e2-helper
 	set -e; cd $(BUILD_TMP)/hotplug-e2-helper; \
-		$(PATCH)/hotplug-e2-helper.patch; \
+		$(call post_patch,$(HOTPLUG_E2_PATCH)); \
 		$(CONFIGURE) \
 			--prefix=/usr \
 		; \
 		$(MAKE) all; \
 		$(MAKE) install prefix=/usr DESTDIR=$(TARGETPREFIX)
 	$(REMOVE)/hotplug-e2-helper
-	touch $@
+	$(TOUCH)
 
 #
 # tuxtxtlib
 #
+TUXTXTLIB_PATCH = tuxtxtlib-1.0-fix-dbox-headers.patch
+
 $(D)/tuxtxtlib: $(D)/bootstrap
+	$(START_BUILD)
 	$(REMOVE)/tuxtxtlib
 	set -e; if [ -d $(ARCHIVE)/tuxtxt.git ]; \
 		then cd $(ARCHIVE)/tuxtxt.git; git pull; \
@@ -29,7 +35,7 @@ $(D)/tuxtxtlib: $(D)/bootstrap
 		fi
 	cp -ra $(ARCHIVE)/tuxtxt.git/libtuxtxt $(BUILD_TMP)/tuxtxtlib
 	set -e; cd $(BUILD_TMP)/tuxtxtlib; \
-		$(PATCH)/tuxtxtlib-1.0-fix-dbox-headers.patch; \
+		$(call post_patch,$(TUXTXTLIB_PATCH)); \
 		aclocal; \
 		autoheader; \
 		autoconf; \
@@ -50,16 +56,19 @@ $(D)/tuxtxtlib: $(D)/bootstrap
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/tuxbox-tuxtxt.pc
 	$(REWRITE_LIBTOOL)/libtuxtxt.la
 	$(REMOVE)/tuxtxtlib
-	touch $@
+	$(TOUCH)
 
 #
 # tuxtxt32bpp
 #
+TUXTXT32BPP_PATCH = tuxtxt32bpp-1.0-fix-dbox-headers.patch
+
 $(D)/tuxtxt32bpp: $(D)/bootstrap $(D)/tuxtxtlib
+	$(START_BUILD)
 	$(REMOVE)/tuxtxt
 	cp -ra $(ARCHIVE)/tuxtxt.git/tuxtxt $(BUILD_TMP)/tuxtxt; \
 	set -e; cd $(BUILD_TMP)/tuxtxt; \
-		$(PATCH)/tuxtxt32bpp-1.0-fix-dbox-headers.patch; \
+		$(call post_patch,$(TUXTXT32BPP_PATCH)); \
 		aclocal; \
 		autoheader; \
 		autoconf; \
@@ -80,7 +89,7 @@ $(D)/tuxtxt32bpp: $(D)/bootstrap $(D)/tuxtxtlib
 		$(MAKE) install prefix=/usr DESTDIR=$(TARGETPREFIX)
 	$(REWRITE_LIBTOOL)/libtuxtxt32bpp.la
 	$(REMOVE)/tuxtxt
-	touch $@
+	$(TOUCH)
 
 #
 # Plugins
@@ -91,6 +100,7 @@ $(D)/enigma2-plugins: $(D)/enigma2_networkbrowser $(D)/enigma2_openwebif
 # enigma2-openwebif
 #
 $(D)/enigma2_openwebif: $(D)/bootstrap $(D)/python $(D)/python_cheetah
+	$(START_BUILD)
 	$(REMOVE)/e2openplugin-OpenWebif
 	set -e; if [ -d $(ARCHIVE)/e2openplugin-OpenWebif.git ]; \
 		then cd $(ARCHIVE)/e2openplugin-OpenWebif.git; git pull; \
@@ -113,12 +123,15 @@ $(D)/enigma2_openwebif: $(D)/bootstrap $(D)/python $(D)/python_cheetah
 		msgfmt -cv -o $(TARGETPREFIX)/usr/lib/enigma2/python/Plugins/Extensions/OpenWebif/locale/pl/LC_MESSAGES/OpenWebif.mo locale/pl.po; \
 		msgfmt -cv -o $(TARGETPREFIX)/usr/lib/enigma2/python/Plugins/Extensions/OpenWebif/locale/uk/LC_MESSAGES/OpenWebif.mo locale/uk.po
 	$(REMOVE)/e2openplugin-OpenWebif
-	touch $@ || true
+	$(TOUCH)
 
 #
 # enigma2-networkbrowser
 #
+ENIGMA2_NETWORBROWSER_PATCH = enigma2-networkbrowser-support-autofs.patch
+
 $(D)/enigma2_networkbrowser: $(D)/bootstrap $(D)/python
+	$(START_BUILD)
 	$(REMOVE)/enigma2-networkbrowser
 	set -e; if [ -d $(ARCHIVE)/enigma2-plugins.git ]; \
 		then cd $(ARCHIVE)/enigma2-plugins.git; git pull; \
@@ -126,7 +139,7 @@ $(D)/enigma2_networkbrowser: $(D)/bootstrap $(D)/python
 		fi
 	cp -ra $(ARCHIVE)/enigma2-plugins.git/networkbrowser/ $(BUILD_TMP)/enigma2-networkbrowser
 	set -e; cd $(BUILD_TMP)/enigma2-networkbrowser; \
-		$(PATCH)/enigma2-networkbrowser-support-autofs.patch; \
+		$(call post_patch,$(ENIGMA2_NETWORBROWSER_PATCH))
 	set -e; cd $(BUILD_TMP)/enigma2-networkbrowser/src/lib; \
 		$(BUILDENV) \
 		sh4-linux-gcc -shared -o netscan.so \
@@ -156,4 +169,4 @@ $(D)/enigma2_networkbrowser: $(D)/bootstrap $(D)/python
 		cp -a src/lib/netscan.so $(TARGETPREFIX)/usr/lib/enigma2/python/Plugins/SystemPlugins/NetworkBrowser/ ; \
 		rm -rf $(TARGETPREFIX)/usr/lib/enigma2/python/Plugins/SystemPlugins/NetworkBrowser/lib
 	$(REMOVE)/enigma2-networkbrowser
-	touch $@ || true
+	$(TOUCH)
