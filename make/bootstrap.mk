@@ -1,6 +1,6 @@
 TOOLCHECK  = find-git find-svn find-gzip find-bzip2 find-patch find-gawk
 TOOLCHECK += find-makeinfo find-automake find-gcc find-libtool
-TOOLCHECK += find-yacc find-flex find-tic find-pkg-config
+TOOLCHECK += find-yacc find-flex find-tic find-pkg-config find-help2man
 TOOLCHECK += find-cmake find-gperf
 
 find-%:
@@ -26,237 +26,288 @@ toolcheck: $(TOOLCHECK) preqs
 		echo; \
 	fi
 
-BOOTSTRAP  = directories crosstool $(D)/ccache
-BOOTSTRAP += $(HOSTPREFIX)/bin/opkg.sh
-BOOTSTRAP += $(HOSTPREFIX)/bin/opkg-chksvn.sh
-BOOTSTRAP += $(HOSTPREFIX)/bin/opkg-gitdescribe.sh
-BOOTSTRAP += $(HOSTPREFIX)/bin/opkg-find-requires.sh
-BOOTSTRAP += $(HOSTPREFIX)/bin/opkg-find-provides.sh
-BOOTSTRAP += $(HOSTPREFIX)/bin/opkg-module-deps.sh
-BOOTSTRAP += $(D)/host_pkgconfig $(D)/host_module_init_tools $(D)/host_mtd_utils
+#
+# host_pkgconfig
+#
+HOST_PKGCONFIG_VER = 0.29.1
+HOST_PKGCONFIG_SOURCE = pkg-config-$(HOST_PKGCONFIG_VER).tar.gz
 
-$(D)/bootstrap: $(BOOTSTRAP)
-	touch $@
+$(ARCHIVE)/$(HOST_PKGCONFIG_SOURCE):
+	$(WGET) https://pkgconfig.freedesktop.org/releases/$(HOST_PKGCONFIG_SOURCE)
 
-SYSTEM_TOOLS  = $(D)/module_init_tools
-SYSTEM_TOOLS += $(D)/busybox
-SYSTEM_TOOLS += $(D)/zlib
-SYSTEM_TOOLS += $(D)/sysvinit
-SYSTEM_TOOLS += $(D)/diverse-tools
-SYSTEM_TOOLS += $(D)/e2fsprogs
-SYSTEM_TOOLS += $(D)/jfsutils
-SYSTEM_TOOLS += $(D)/hd-idle
-SYSTEM_TOOLS += $(D)/fbshot
-SYSTEM_TOOLS += $(D)/portmap
-SYSTEM_TOOLS += $(D)/nfs_utils
-SYSTEM_TOOLS += $(D)/vsftpd
-SYSTEM_TOOLS += $(D)/autofs
-SYSTEM_TOOLS += $(D)/driver
-
-$(D)/system-tools: $(SYSTEM_TOOLS) $(TOOLS)
+$(D)/host_pkgconfig: directories $(ARCHIVE)/$(HOST_PKGCONFIG_SOURCE)
+	$(START_BUILD)
+	$(REMOVE)/pkg-config-$(HOST_PKGCONFIG_VER)
+	$(UNTAR)/$(HOST_PKGCONFIG_SOURCE)
+	set -e; cd $(BUILD_TMP)/pkg-config-$(HOST_PKGCONFIG_VER); \
+		./configure $(SILENT_OPT) \
+			--prefix=$(HOST_DIR) \
+			--program-prefix=$(TARGET)- \
+			--disable-host-tool \
+			--with-pc_path=$(PKG_CONFIG_PATH) \
+		; \
+		$(MAKE); \
+		$(MAKE) install
+	ln -sf $(TARGET)-pkg-config $(HOST_DIR)/bin/pkg-config
+	$(REMOVE)/pkg-config-$(HOST_PKGCONFIG_VER)
 	$(TOUCH)
 
-$(HOSTPREFIX)/bin/opkg%sh: | directories
-	ln -sf $(SCRIPTS_DIR)/$(shell basename $@) $(HOSTPREFIX)/bin
+#
+# host_module_init_tools
+#
+HOST_MODULE_INIT_TOOLS_VER = 3.16
+HOST_MODULE_INIT_TOOLS_SOURCE = module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER).tar.bz2
+HOST_MODULE_INIT_TOOLS_PATCH = module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER).patch
+HOST_MODULE_INIT_TOOLS_HOST_PATCH = module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER).patch
 
-$(HOSTPREFIX)/bin/unpack-rpm.sh: | directories
-	ln -sf $(SCRIPTS_DIR)/$(shell basename $@) $(HOSTPREFIX)/bin
+$(ARCHIVE)/$(HOST_MODULE_INIT_TOOLS_SOURCE):
+	$(WGET) ftp.europeonline.com/pub/linux/utils/kernel/module-init-tools/$(HOST_MODULE_INIT_TOOLS_SOURCE)
+
+$(D)/host_module_init_tools: $(ARCHIVE)/$(HOST_MODULE_INIT_TOOLS_SOURCE)
+	$(START_BUILD)
+	$(REMOVE)/module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER)
+	$(UNTAR)/$(HOST_MODULE_INIT_TOOLS_SOURCE)
+	set -e; cd $(BUILD_TMP)/module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER); \
+		$(call post_patch,$(HOST_MODULE_INIT_TOOLS_PATCH)); \
+		autoreconf -fi $(SILENT_OPT); \
+		./configure $(SILENT_OPT) \
+			--prefix=$(HOST_DIR) \
+			--sbindir=$(HOST_DIR)/bin \
+		; \
+		$(MAKE); \
+		$(MAKE) install
+	$(REMOVE)/module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER)
+	$(TOUCH)
 
 #
-STM_RELOCATE = /opt/STM/STLinux-2.4
+# host_mtd_utils
+#
+HOST_MTD_UTILS_VER = 1.5.2
+HOST_MTD_UTILS_SOURCE = mtd-utils-$(HOST_MTD_UTILS_VER).tar.bz2
+HOST_MTD_UTILS_PATCH = host-mtd-utils-$(HOST_MTD_UTILS_VER).patch
 
-# updates / downloads
-STL_FTP = http://ftp.stlinux.com/pub/stlinux/2.4
-STL_FTP_UPD_SRC  = $(STL_FTP)/updates/SRPMS
-STL_FTP_UPD_SH4  = $(STL_FTP)/updates/RPMS/sh4
-STL_FTP_UPD_HOST = $(STL_FTP)/updates/RPMS/host
+$(ARCHIVE)/$(HOST_MTD_UTILS_SOURCE):
+	$(WGET) ftp://ftp.infradead.org/pub/mtd-utils/$(HOST_MTD_UTILS_SOURCE)
 
-## ordering is important here. The /host/ rule must stay before the less
-## specific %.sh4/%.i386/%.noarch rule. No idea if this is portable or
-## even reliable :-(
-$(ARCHIVE)/stlinux24-host-%.i386.rpm \
-$(ARCHIVE)/stlinux24-host-%noarch.rpm:
-	$(WGET) $(STL_FTP_UPD_HOST)/$(subst $(ARCHIVE)/,"",$@)
-
-$(ARCHIVE)/stlinux24-host-%.src.rpm:
-	$(WGET) $(STL_FTP_UPD_SRC)/$(subst $(ARCHIVE)/,"",$@)
-
-$(ARCHIVE)/stlinux24-sh4-%.sh4.rpm \
-$(ARCHIVE)/stlinux24-cross-%.i386.rpm \
-$(ARCHIVE)/stlinux24-sh4-%.noarch.rpm:
-	$(WGET) $(STL_FTP_UPD_SH4)/$(subst $(ARCHIVE)/,"",$@)
+$(D)/host_mtd_utils: directories $(ARCHIVE)/$(HOST_MTD_UTILS_SOURCE)
+	$(START_BUILD)
+	$(REMOVE)/mtd-utils-$(HOST_MTD_UTILS_VER)
+	$(UNTAR)/$(HOST_MTD_UTILS_SOURCE)
+	set -e; cd $(BUILD_TMP)/mtd-utils-$(HOST_MTD_UTILS_VER); \
+		$(call post_patch,$(HOST_MTD_UTILS_PATCH)); \
+		$(MAKE) `pwd`/mkfs.jffs2 `pwd`/sumtool BUILDDIR=`pwd` WITHOUT_XATTR=1 DESTDIR=$(HOST_DIR); \
+		$(MAKE) install DESTDIR=$(HOST_DIR)/bin
+	$(REMOVE)/mtd-utils-$(HOST_MTD_UTILS_VER)
+	$(TOUCH)
 
 #
-# install the RPMs
+# host_mkcramfs
 #
+HOST_MKCRAMFS_VER = 1.1
+HOST_MKCRAMFS_SOURCE = cramfs-$(HOST_MKCRAMFS_VER).tar.gz
 
-# 4.6.3
-#BINUTILS_VER  = 2.22-64
-#GCC_VER       = 4.6.3-111
-#LIBGCC_VER    = 4.6.3-111
-#GLIBC_VER     = 2.10.2-42
+$(ARCHIVE)/$(HOST_MKCRAMFS_SOURCE):
+	$(WGET) https://sourceforge.net/projects/cramfs/files/cramfs/$(HOST_MKCRAMFS_VER)/$(HOST_MKCRAMFS_SOURCE)
 
-# 4.8.4
-BINUTILS_VER  = 2.24.51.0.3-76
-GCC_VER       = 4.8.4-139
-LIBGCC_VER    = 4.8.4-148
-GLIBC_VER     = 2.14.1-59
+$(D)/host_mkcramfs: directories $(ARCHIVE)/$(HOST_MKCRAMFS_SOURCE)
+	$(START_BUILD)
+	$(REMOVE)/cramfs-$(HOST_MKCRAMFS_VER)
+	$(UNTAR)/$(HOST_MKCRAMFS_SOURCE)
+	set -e; cd $(BUILD_TMP)/cramfs-$(HOST_MKCRAMFS_VER); \
+		$(MAKE) all
+		cp $(BUILD_TMP)/cramfs-$(HOST_MKCRAMFS_VER)/mkcramfs $(HOST_DIR)/bin
+		cp $(BUILD_TMP)/cramfs-$(HOST_MKCRAMFS_VER)/cramfsck $(HOST_DIR)/bin
+	$(REMOVE)/cramfs-$(HOST_MKCRAMFS_VER)
+	$(TOUCH)
 
-crosstool-rpminstall: \
-$(ARCHIVE)/stlinux24-cross-sh4-binutils-$(BINUTILS_VER).i386.rpm \
-$(ARCHIVE)/stlinux24-cross-sh4-binutils-dev-$(BINUTILS_VER).i386.rpm \
-$(ARCHIVE)/stlinux24-cross-sh4-cpp-$(GCC_VER).i386.rpm \
-$(ARCHIVE)/stlinux24-cross-sh4-gcc-$(GCC_VER).i386.rpm \
-$(ARCHIVE)/stlinux24-cross-sh4-g++-$(GCC_VER).i386.rpm \
-$(ARCHIVE)/stlinux24-sh4-linux-kernel-headers-$(STM_KERNEL_HEADERS_VER).noarch.rpm \
-$(ARCHIVE)/stlinux24-sh4-glibc-$(GLIBC_VER).sh4.rpm \
-$(ARCHIVE)/stlinux24-sh4-glibc-dev-$(GLIBC_VER).sh4.rpm \
-$(ARCHIVE)/stlinux24-sh4-libgcc-$(LIBGCC_VER).sh4.rpm \
-$(ARCHIVE)/stlinux24-sh4-libstdc++-$(LIBGCC_VER).sh4.rpm \
-$(ARCHIVE)/stlinux24-sh4-libstdc++-dev-$(LIBGCC_VER).sh4.rpm
-	unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/devkit/sh4 $(CROSS_DIR) \
-		$^
-	touch $(D)/$(notdir $@)
+#
+# host_mksquashfs3
+#
+HOST_MKSQUASHFS3_VER = 3.3
+HOST_MKSQUASHFS3_SOURCE = squashfs$(HOST_MKSQUASHFS3_VER).tar.gz
 
-crosstool: directories driver-symlink \
-$(HOSTPREFIX)/bin/unpack-rpm.sh \
-crosstool-rpminstall
-	set -e; cd $(CROSS_BASE); rm -f sh4-linux/sys-root; ln -s ../target sh4-linux/sys-root; \
-	if [ -e $(CROSS_DIR)/target/usr/lib/libstdc++.la ]; then \
-		sed -i "s,^libdir=.*,libdir='$(CROSS_DIR)/target/usr/lib'," $(CROSS_DIR)/target/usr/lib/lib{std,sup}c++.la; \
+$(ARCHIVE)/$(HOST_MKSQUASHFS3_SOURCE):
+	$(WGET) https://sourceforge.net/projects/squashfs/files/OldFiles/$(HOST_MKSQUASHFS3_SOURCE)
+
+$(D)/host_mksquashfs3: directories $(ARCHIVE)/$(HOST_MKSQUASHFS3_SOURCE)
+	$(START_BUILD)
+	$(REMOVE)/squashfs$(HOST_MKSQUASHFS3_VER)
+	$(UNTAR)/$(HOST_MKSQUASHFS3_SOURCE)
+	set -e; cd $(BUILD_TMP)/squashfs$(HOST_MKSQUASHFS3_VER)/squashfs-tools; \
+		$(MAKE) CC=gcc all
+		mv $(BUILD_TMP)/squashfs$(HOST_MKSQUASHFS3_VER)/squashfs-tools/mksquashfs $(HOST_DIR)/bin/mksquashfs3.3
+		mv $(BUILD_TMP)/squashfs$(HOST_MKSQUASHFS3_VER)/squashfs-tools/unsquashfs $(HOST_DIR)/bin/unsquashfs3.3
+	$(REMOVE)/squashfs$(HOST_MKSQUASHFS3_VER)
+	$(TOUCH)
+
+#
+# host_mksquashfs with LZMA support
+#
+HOST_MKSQUASHFS_VER = 4.2
+HOST_MKSQUASHFS_SOURCE = squashfs$(HOST_MKSQUASHFS_VER).tar.gz
+
+LZMA_VER = 4.65
+LZMA_SOURCE = lzma-$(LZMA_VER).tar.bz2
+
+$(ARCHIVE)/$(HOST_MKSQUASHFS_SOURCE):
+	$(WGET) https://sourceforge.net/projects/squashfs/files/squashfs/squashfs$(HOST_MKSQUASHFS_VER)/$(HOST_MKSQUASHFS_SOURCE)
+
+$(ARCHIVE)/$(LZMA_SOURCE):
+	$(WGET) http://downloads.openwrt.org/sources/$(LZMA_SOURCE)
+
+$(D)/host_mksquashfs: directories $(ARCHIVE)/$(LZMA_SOURCE) $(ARCHIVE)/$(HOST_MKSQUASHFS_SOURCE)
+	$(START_BUILD)
+	$(REMOVE)/lzma-$(LZMA_VER)
+	$(UNTAR)/$(LZMA_SOURCE)
+	$(REMOVE)/squashfs$(HOST_MKSQUASHFS_VER)
+	$(UNTAR)/$(HOST_MKSQUASHFS_SOURCE)
+	set -e; cd $(BUILD_TMP)/squashfs$(HOST_MKSQUASHFS_VER); \
+		$(MAKE) -C squashfs-tools \
+			LZMA_SUPPORT=1 \
+			LZMA_DIR=$(BUILD_TMP)/lzma-$(LZMA_VER) \
+			XATTR_SUPPORT=0 \
+			XATTR_DEFAULT=0 \
+			install INSTALL_DIR=$(HOST_DIR)/bin
+	$(REMOVE)/lzma-$(LZMA_VER)
+	$(REMOVE)/squashfs$(HOST_MKSQUASHFS_VER)
+	$(TOUCH)
+
+#
+#
+#
+$(HOST_DIR)/bin/unpack%.sh \
+$(HOST_DIR)/bin/get%.sh \
+$(HOST_DIR)/bin/opkg%sh: | directories
+	ln -sf $(SCRIPTS_DIR)/$(shell basename $@) $(HOST_DIR)/bin
+
+#
+#
+#
+BOOTSTRAP  = directories
+BOOTSTRAP += $(D)/ccache
+BOOTSTRAP += $(HOST_DIR)/bin/opkg.sh
+BOOTSTRAP += $(HOST_DIR)/bin/opkg-chksvn.sh
+BOOTSTRAP += $(HOST_DIR)/bin/opkg-gitdescribe.sh
+BOOTSTRAP += $(HOST_DIR)/bin/opkg-find-requires.sh
+BOOTSTRAP += $(HOST_DIR)/bin/opkg-find-provides.sh
+BOOTSTRAP += $(HOST_DIR)/bin/opkg-module-deps.sh
+BOOTSTRAP += $(HOST_DIR)/bin/get-git-archive.sh
+BOOTSTRAP += $(CROSSTOOL)
+BOOTSTRAP += $(TARGET_DIR)/lib/libc.so.6
+BOOTSTRAP += $(D)/host_pkgconfig
+BOOTSTRAP += $(D)/host_module_init_tools
+BOOTSTRAP += $(D)/host_mtd_utils
+BOOTSTRAP += $(D)/host_mkcramfs
+BOOTSTRAP += $(D)/host_mksquashfs
+
+$(D)/bootstrap: $(BOOTSTRAP)
+	@touch $@
+
+#
+#
+#
+SYSTEM_TOOLS  = $(D)/busybox
+SYSTEM_TOOLS += $(D)/zlib
+SYSTEM_TOOLS += $(D)/sysvinit
+ifeq ($(BOXARCH), sh4)
+SYSTEM_TOOLS += $(D)/diverse-tools
+endif
+SYSTEM_TOOLS += $(D)/e2fsprogs
+SYSTEM_TOOLS += $(D)/jfsutils
+SYSTEM_TOOLS += $(D)/hdidle
+SYSTEM_TOOLS += $(D)/portmap
+ifneq ($(BOXTYPE), $(filter $(BOXTYPE), ufs922))
+SYSTEM_TOOLS += $(D)/nfs_utils
+endif
+SYSTEM_TOOLS += $(D)/vsftpd
+SYSTEM_TOOLS += $(D)/autofs
+SYSTEM_TOOLS += $(D)/udpxy
+SYSTEM_TOOLS += $(D)/dvbsnoop
+ifeq ($(BOXARCH), sh4)
+SYSTEM_TOOLS += $(D)/fbshot
+SYSTEM_TOOLS += $(D)/driver
+endif
+
+$(D)/system-tools: $(SYSTEM_TOOLS) $(TOOLS)
+	@touch $@
+
+#
+# YAUD NONE
+#
+YAUD_NONE     = $(D)/bootstrap
+YAUD_NONE    += $(KERNEL)
+YAUD_NONE    += $(D)/system-tools
+
+yaud-none: $(YAUD_NONE)
+	@touch $(D)/$(notdir $@)
+
+#
+#
+#
+$(DRIVER_DIR):
+	@echo '===================================================================='
+	@echo '      Cloning $(GIT_NAME_DRIVER)-driver git repository'
+	@echo '===================================================================='
+	if [ ! -e $(DRIVER_DIR)/.git ]; then \
+		git clone $(GITHUB)/$(GIT_NAME_DRIVER)/driver.git driver; \
 	fi
-	if test -e $(CROSS_DIR)/target/usr/lib/libstdc++.so; then \
-		cp -a $(CROSS_DIR)/target/usr/lib/libstdc++.s*[!y] $(TARGETPREFIX)/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libdl.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libm.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/librt.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libutil.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libpthread.so $(TARGETPREFIX)/usr/lib; \
-		cp -a $(CROSS_DIR)/target/usr/lib/libresolv.so $(TARGETPREFIX)/usr/lib; \
-		ln -s $(CROSS_DIR)/target/usr/lib/libc.so $(TARGETPREFIX)/usr/lib/libc.so; \
-		ln -s $(CROSS_DIR)/target/usr/lib/libc_nonshared.a $(TARGETPREFIX)/usr/lib/libc_nonshared.a; \
+
+$(APPS_DIR):
+	@echo '===================================================================='
+	@echo '      Cloning $(GIT_NAME_APPS)-apps git repository'
+	@echo '===================================================================='
+	if [ ! -e $(APPS_DIR)/.git ]; then \
+		git clone $(GITHUB)/$(GIT_NAME_APPS)/apps.git apps; \
 	fi
-	if test -e $(CROSS_DIR)/target/lib; then \
-		cp -a $(CROSS_DIR)/target/lib/*so* $(TARGETPREFIX)/lib; \
+
+$(FLASH_DIR):
+	@echo '===================================================================='
+	@echo '      Cloning $(GIT_NAME_FLASH)-flash git repository'
+	@echo '===================================================================='
+	if [ ! -e $(FLASH_DIR)/.git ]; then \
+		git clone $(GITHUB)/$(GIT_NAME_FLASH)/flash.git flash; \
 	fi
-	if test -e $(CROSS_DIR)/target/sbin/ldconfig; then \
-		cp -a $(CROSS_DIR)/target/sbin/ldconfig $(TARGETPREFIX)/sbin; \
-		cp -a $(CROSS_DIR)/target/etc/ld.so.conf $(TARGETPREFIX)/etc; \
-		cp -a $(CROSS_DIR)/target/etc/host.conf $(TARGETPREFIX)/etc; \
-	fi
-	touch $(D)/$(notdir $@)
+	@echo ''
 
-#
-# host_u_boot_tools
-#
-host_u_boot_tools: \
-$(ARCHIVE)/stlinux24-host-u-boot-tools-1.3.1_stm24-9.i386.rpm
-	unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/host/bin $(HOSTPREFIX)/bin \
-		$^
-	touch $(D)/$(notdir $@)
-
-#
-# crosstool-ng
-#
-CROSSTOOL_NG_VER = 1.22.0
-
-$(ARCHIVE)/crosstool-ng-$(CROSSTOOL_NG_VER).tar.xz:
-	$(WGET) http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$(CROSSTOOL_NG_VER).tar.xz
-
-crosstool-ng: $(ARCHIVE)/crosstool-ng-$(CROSSTOOL_NG_VER).tar.xz
-	make $(BUILD_TMP)
-	if [ ! -e $(BASE_DIR)/cross ]; then \
-		mkdir -p $(BASE_DIR)/cross; \
-	fi;
-	$(REMOVE)/crosstool-ng
-	$(UNTAR)/crosstool-ng-$(CROSSTOOL_NG_VER).tar.xz
-	set -e; unset CONFIG_SITE; cd $(BUILD_TMP)/crosstool-ng; \
-		cp -a $(PATCHES)/crosstool-ng-$(CROSSTOOL_NG_VER).config .config; \
-		NUM_CPUS=$$(expr `getconf _NPROCESSORS_ONLN` \* 2); \
-		MEM_512M=$$(awk '/MemTotal/ {M=int($$2/1024/512); print M==0?1:M}' /proc/meminfo); \
-		test $$NUM_CPUS -gt $$MEM_512M && NUM_CPUS=$$MEM_512M; \
-		test $$NUM_CPUS = 0 && NUM_CPUS=1; \
-		sed -i "s@^CT_PARALLEL_JOBS=.*@CT_PARALLEL_JOBS=$$NUM_CPUS@" .config; \
-		export NG_ARCHIVE=$(ARCHIVE); \
-		export BS_BASE_DIR=$(BASE_DIR); \
-		./configure --enable-local; \
-		MAKELEVEL=0 make; \
-		./ct-ng oldconfig; \
-		./ct-ng build
-
-crossmenuconfig: $(ARCHIVE)/crosstool-ng-$(CROSSTOOL_NG_VER).tar.xz
-	make $(BUILD_TMP)
-	$(REMOVE)/crosstool-ng-$(CROSSTOOL_NG_VER)
-	$(UNTAR)/crosstool-ng-$(CROSSTOOL_NG_VER).tar.xz
-	set -e; unset CONFIG_SITE; cd $(BUILD_TMP)/crosstool-ng; \
-		cp -a $(PATCHES)/crosstool-ng-$(CROSSTOOL_NG_VER).config .config; \
-		test -f ./configure || ./bootstrap && \
-		./configure --enable-local; MAKELEVEL=0 make; chmod 0755 ct-ng; \
-		./ct-ng menuconfig
-
-#
-# directories
-#
 PREQS  = $(DRIVER_DIR)
 PREQS += $(APPS_DIR)
 PREQS += $(FLASH_DIR)
 
 preqs: $(PREQS)
 
-$(DRIVER_DIR):
-	@echo '=============================================================='
-	@echo '      Cloning $(GIT_NAME_DRIVER)-driver git repo                     '
-	@echo '=============================================================='
-	if [ ! -e $(DRIVER_DIR)/.git ]; then \
-		git clone $(GITHUB)/$(GIT_NAME_DRIVER)/driver.git driver; \
-	fi
-
-$(APPS_DIR):
-	@echo '=============================================================='
-	@echo '      Cloning $(GIT_NAME_APPS)-apps git repo                  '
-	@echo '=============================================================='
-	if [ ! -e $(APPS_DIR)/.git ]; then \
-		git clone $(GITHUB)/$(GIT_NAME_APPS)/apps.git apps; \
-	fi
-
-$(FLASH_DIR):
-	@echo '=============================================================='
-	@echo '      Cloning $(GIT_NAME_FLASH)-flash git repo                '
-	@echo '=============================================================='
-	if [ ! -e $(FLASH_DIR)/.git ]; then \
-		git clone $(GITHUB)/$(GIT_NAME_FLASH)/flash-bs.git flash; \
-	fi
-	@echo ''
-
+#
+# directories
+#
 directories:
 	test -d $(D) || mkdir $(D)
 	test -d $(ARCHIVE) || mkdir $(ARCHIVE)
+	test -d $(STL_ARCHIVE) || mkdir $(STL_ARCHIVE)
 	test -d $(BUILD_TMP) || mkdir $(BUILD_TMP)
 	test -d $(SOURCE_DIR) || mkdir $(SOURCE_DIR)
-	install -d $(TARGETPREFIX)
+	install -d $(TARGET_DIR)
 	install -d $(CROSS_DIR)
 	install -d $(BOOT_DIR)
-	install -d $(HOSTPREFIX)
-	install -d $(HOSTPREFIX)/{bin,lib,share}
-	install -d $(TARGETPREFIX)/{bin,boot,etc,lib,sbin,usr,var}
-	install -d $(TARGETPREFIX)/etc/{init.d,mdev,network,rc.d}
-	install -d $(TARGETPREFIX)/etc/rc.d/{rc0.d,rc6.d}
-	ln -s ../init.d $(TARGETPREFIX)/etc/rc.d/init.d
-	install -d $(TARGETPREFIX)/lib/{lsb,firmware}
-	install -d $(TARGETPREFIX)/usr/{bin,lib,local,sbin,share}
-	install -d $(TARGETPREFIX)/usr/lib/pkgconfig
-	install -d $(TARGETPREFIX)/usr/include/linux
-	install -d $(TARGETPREFIX)/usr/include/linux/dvb
-	install -d $(TARGETPREFIX)/usr/local/{bin,sbin,share}
-	install -d $(TARGETPREFIX)/var/{etc,lib,run}
-	install -d $(TARGETPREFIX)/var/lib/{misc,nfs}
-	install -d $(TARGETPREFIX)/var/bin
+	install -d $(HOST_DIR)
+	install -d $(HOST_DIR)/{bin,lib,share}
+	install -d $(TARGET_DIR)/{bin,boot,etc,lib,sbin,usr,var}
+	install -d $(TARGET_DIR)/etc/{init.d,mdev,network,rc.d}
+	install -d $(TARGET_DIR)/etc/rc.d/{rc0.d,rc6.d}
+	ln -sf ../init.d $(TARGET_DIR)/etc/rc.d/init.d
+	install -d $(TARGET_DIR)/lib/{lsb,firmware}
+	install -d $(TARGET_DIR)/usr/{bin,lib,local,sbin,share}
+	install -d $(TARGET_DIR)/usr/lib/pkgconfig
+	install -d $(TARGET_DIR)/usr/include/linux
+	install -d $(TARGET_DIR)/usr/include/linux/dvb
+	install -d $(TARGET_DIR)/usr/local/{bin,sbin,share}
+	install -d $(TARGET_DIR)/var/{etc,lib,run}
+	install -d $(TARGET_DIR)/var/lib/{misc,nfs}
+	install -d $(TARGET_DIR)/var/bin
 	touch $(D)/$(notdir $@)
 
 #
 # ccache
 #
-CCACHE_BINDIR = $(HOSTPREFIX)/bin
+CCACHE_BINDIR = $(HOST_DIR)/bin
 CCACHE_BIN = $(CCACHE)
 
 CCACHE_LINKS = \
@@ -274,13 +325,5 @@ $(D)/ccache:
 	touch $@
 
 # hack to make sure they are always copied
-PHONY += ccache bootstrap
+PHONY += ccache
 
-#
-# YAUD NONE
-#
-yaud-none: \
-	$(D)/bootstrap \
-	$(D)/linux-kernel \
-	$(D)/system-tools
-	@touch $(D)/$(notdir $@)

@@ -89,6 +89,7 @@ PACKAGES="\
 	${UBUNTU:+lsb-release}          ${SUSE:+lsb-release}         ${FEDORA:+redhat-lsb}     ${GENTOO:+lsb-release} \
 	${UBUNTU:+git-core}             ${SUSE:+git-core}            ${FEDORA:+git}            ${GENTOO:+git}         \
 	${UBUNTU:+libncurses5-dev}      ${SUSE:+ncurses-devel}       ${FEDORA:+ncurses-devel}  ${GENTOO:+ncurses}     \
+	${UBUNTU:+libncursesw5-dev}                                                                                   \
 	${UBUNTU:+gettext}              ${SUSE:+gettext-devel}       ${FEDORA:+gettext-devel}  ${GENTOO:+gettext}     \
 	${UBUNTU:+zlib1g-dev}           ${SUSE:+zlib-devel}          ${FEDORA:+zlib-devel}     ${GENTOO:+zlib}        \
 	${UBUNTU:+g++}                  ${SUSE:+gcc gcc-c++}         ${FEDORA:+gcc-c++}                               \
@@ -107,17 +108,18 @@ PACKAGES="\
 	${UBUNTU:+texi2html}                                                                                          \
 	${UBUNTU:+help2man}                                                                                           \
 	${UBUNTU:+libcurl4-openssl-dev} ${SUSE:+libcurl-devel}       ${FEDORA:+libcurl-devel}                         \
-	${UBUNTU:+liblzo2-dev}          ${SUSE:+lzo-devel}           ${FEDORA:+lzo-devel}          ${GENTOO:+lzo:2}   \
-	${UBUNTU:+ruby}                                                                            ${GENTOO:+ruby}    \
+	${UBUNTU:+liblzo2-dev}          ${SUSE:+lzo-devel}           ${FEDORA:+lzo-devel}      ${GENTOO:+lzo:2}       \
+	${UBUNTU:+ruby}                                                                        ${GENTOO:+ruby}        \
 	${UBUNTU:+libltdl-dev}                                       ${FEDORA:+libtool-ltdl-devel}                    \
 	                                                             ${FEDORA:+byacc}                                 \
 	${UBUNTU:+libssl-dev}           ${SUSE:+libopenssl-devel}    ${FEDORA:+openssl-devel}                         \
+	${UBUNTU:+libmount-dev}                                                                                       \
 ";
 
 if [ "$UBUNTU" == 1 ]; then
 	UBUNTU_VERSION=`lsb_release -r | grep "Release" | cut -f2 | cut -d . -f1`
 elif [ "$UBUNTU" == 2 ]; then
-	MINT_VERSION=`lsb_release -r | grep "Release" | cut -f2`
+	MINT_VERSION=`lsb_release -r | grep "Release" | cut -f2 | cut -d . -f1`
 fi
 if ([ "$UBUNTU" == 1  ] &&  [ "$UBUNTU_VERSION" -ge "16" ]) || ([ "$UBUNTU" == 2 ] && [ "$MINT_VERSION" -ge "18" ]); then
 	PACKAGES="$PACKAGES \
@@ -152,4 +154,5 @@ if [ ! "$?" -eq "0" ]; then
 fi
 
 # for user mknod
-chmod +s /bin/mknod
+#chmod +s /bin/mknod
+

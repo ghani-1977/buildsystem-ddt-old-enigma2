@@ -7,6 +7,10 @@ tools-clean:
 	-$(MAKE) -C $(APPS_DIR)/tools/devinit distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/evremote2 distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/fp_control distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/flashtool-fup distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/flashtool-mup distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/flashtool_mup distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/flashtool-pad distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/hotplug distclean
 ifeq ($(BOXTYPE), $(filter $(BOXTYPE), ipbox55 ipbox99 ipbox9900 cuberevo cuberevo_mini cuberevo_mini2 cuberevo_250hd cuberevo_2000hd cuberevo_3000hd))
 	-$(MAKE) -C $(APPS_DIR)/tools/ipbox_eeprom distclean
@@ -18,6 +22,7 @@ ifeq ($(IMAGE), $(filter $(IMAGE), enigma2 enigma2-wlandriver))
 	-$(MAKE) -C $(APPS_DIR)/tools/libmme_host distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/libmme_image distclean
 endif
+	-$(MAKE) -C $(APPS_DIR)/tools/minimon distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/showiframe distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/spf_tool distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/stfbcontrol distclean
@@ -29,6 +34,9 @@ endif
 	-$(MAKE) -C $(APPS_DIR)/tools/ustslave distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/vfdctl distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/wait4button distclean
+ifneq ($(wildcard $(APPS_DIR)/tools/own-tools),)
+	-$(MAKE) -C $(APPS_DIR)/tools/own-tools distclean
+endif
 
 #
 # aio-grab
@@ -40,7 +48,7 @@ $(D)/tools-aio-grab: $(D)/bootstrap $(D)/libpng $(D)/libjpeg
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -53,20 +61,20 @@ $(D)/tools-devinit: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
 # evremote2
 #
 $(D)/tools-evremote2: $(D)/bootstrap
-	@$(START_BUILD)
+	$(START_BUILD)
 	set -e; cd $(APPS_DIR)/tools/evremote2; \
 		$(CONFIGURE_TOOLS) \
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -79,8 +87,63 @@ $(D)/tools-fp_control: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
-	@$(TOUCH)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
+	$(TOUCH)
+
+#
+# flashtool-fup
+#
+$(D)/tools-flashtool-fup: directories
+	$(START_BUILD)
+	set -e; cd $(APPS_DIR)/tools/flashtool-fup; \
+		./autogen.sh $(SILENT_OPT); \
+		./configure $(SILENT_OPT) \
+			--prefix= \
+		; \
+		$(MAKE); \
+		$(MAKE) install DESTDIR=$(HOST_DIR)
+	$(TOUCH)
+
+#
+# flashtool-mup
+#
+$(D)/tools-flashtool-mup: directories
+	$(START_BUILD)
+	set -e; cd $(APPS_DIR)/tools/flashtool-mup; \
+		./autogen.sh $(SILENT_OPT); \
+		./configure $(SILENT_OPT) \
+			--prefix= \
+		; \
+		$(MAKE); \
+		$(MAKE) install DESTDIR=$(HOST_DIR)
+	$(TOUCH)
+
+#
+# flashtool_mup-box
+#
+$(D)/tools_flashtool_mup:
+	$(START_BUILD)
+	set -e; cd $(APPS_DIR)/tools/flashtool_mup; \
+		$(CONFIGURE_TOOLS) \
+			--prefix=/usr \
+		; \
+		$(MAKE); \
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
+	$(TOUCH)
+
+#
+# flashtool-pad
+#
+$(D)/tools-flashtool-pad: directories
+	$(START_BUILD)
+	set -e; cd $(APPS_DIR)/tools/flashtool-pad; \
+		./autogen.sh $(SILENT_OPT); \
+		./configure $(SILENT_OPT) \
+			--prefix= \
+		; \
+		$(MAKE); \
+		$(MAKE) install DESTDIR=$(HOST_DIR)
+	$(TOUCH)
 
 #
 # hotplug
@@ -92,7 +155,7 @@ $(D)/tools-hotplug: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -105,7 +168,7 @@ $(D)/tools-ipbox_eeprom: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -118,7 +181,7 @@ $(D)/tools-libeplayer3: $(D)/bootstrap $(D)/ffmpeg
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -133,7 +196,7 @@ $(D)/tools-libmme_host: $(D)/bootstrap $(D)/driver
 			$(if $(MULTICOM406), --enable-multicom406) \
 		; \
 		$(MAKE) DRIVER_TOPDIR=$(DRIVER_DIR); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX) DRIVER_TOPDIR=$(DRIVER_DIR)
+		$(MAKE) install DESTDIR=$(TARGET_DIR) DRIVER_TOPDIR=$(DRIVER_DIR)
 	$(TOUCH)
 
 #
@@ -146,7 +209,20 @@ $(D)/tools-libmme_image: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE) DRIVER_TOPDIR=$(DRIVER_DIR); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX) DRIVER_TOPDIR=$(DRIVER_DIR)
+		$(MAKE) install DESTDIR=$(TARGET_DIR) DRIVER_TOPDIR=$(DRIVER_DIR)
+	$(TOUCH)
+
+#
+# minimon
+#
+$(D)/tools-minimon: $(D)/bootstrap $(D)/libjpeg_turbo
+	$(START_BUILD)
+	set -e; cd $(APPS_DIR)/tools/minimon; \
+		$(CONFIGURE_TOOLS) \
+			--prefix= \
+		; \
+		$(MAKE) KERNEL_DIR=$(KERNEL_DIR) TARGET=$(TARGET) TARGET_DIR=$(TARGET_DIR); \
+		$(MAKE) install KERNEL_DIR=$(KERNEL_DIR) TARGET=$(TARGET) TARGET_DIR=$(TARGET_DIR) DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -159,7 +235,7 @@ $(D)/tools-showiframe: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -172,7 +248,7 @@ $(D)/tools-spf_tool: $(D)/bootstrap $(D)/libusb
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -185,7 +261,7 @@ $(D)/tools-stfbcontrol: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -198,7 +274,7 @@ $(D)/tools-streamproxy: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -211,7 +287,7 @@ $(D)/tools-tfd2mtd: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -224,7 +300,7 @@ $(D)/tools-tffpctl: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -237,7 +313,7 @@ $(D)/tools-ustslave: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -254,7 +330,7 @@ $(D)/tools-vfdctl: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE) CPPFLAGS="$(EXTRA_CPPFLAGS)"; \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
 #
@@ -267,14 +343,32 @@ $(D)/tools-wait4button: $(D)/bootstrap
 			--prefix= \
 		; \
 		$(MAKE); \
-		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
 	$(TOUCH)
 
+#
+# own-tools
+#
+$(D)/tools-own-tools: $(D)/bootstrap $(D)/libcurl
+	$(START_BUILD)
+	set -e; cd $(APPS_DIR)/tools/own-tools; \
+		$(CONFIGURE_TOOLS) \
+			--prefix= \
+		; \
+		$(MAKE); \
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
+	$(TOUCH)
 
 TOOLS  = $(D)/tools-aio-grab
 TOOLS += $(D)/tools-devinit
 TOOLS += $(D)/tools-evremote2
 TOOLS += $(D)/tools-fp_control
+TOOLS += $(D)/tools-flashtool-fup
+ifeq ($(BOXTYPE), $(filter $(BOXTYPE), ufs912))
+TOOLS += $(D)/tools_flashtool_mup
+endif
+TOOLS += $(D)/tools-flashtool-mup
+TOOLS += $(D)/tools-flashtool-pad
 TOOLS += $(D)/tools-hotplug
 ifeq ($(BOXTYPE), $(filter $(BOXTYPE), ipbox55 ipbox99 ipbox9900 cuberevo cuberevo_mini cuberevo_mini2 cuberevo_250hd cuberevo_2000hd cuberevo_3000hd))
 TOOLS += $(D)/tools-ipbox_eeprom
@@ -295,6 +389,9 @@ TOOLS += $(D)/tools-libmme_image
 endif
 ifeq ($(MEDIAFW), $(filter $(MEDIAFW), eplayer3 gst-eplayer3))
 TOOLS += $(D)/tools-libeplayer3
+endif
+ifneq ($(wildcard $(APPS_DIR)/tools/own-tools),)
+TOOLS += $(D)/tools-own-tools
 endif
 
 $(D)/tools: $(TOOLS)
