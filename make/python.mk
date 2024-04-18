@@ -11,7 +11,7 @@ PYTHON_BUILD = \
 	LDSHARED="$(TARGET)-gcc -shared" \
 	PYTHONPATH=$(TARGET_DIR)/$(PYTHON_DIR)/site-packages \
 	CPPFLAGS="$(TARGET_CPPFLAGS) -I$(TARGET_DIR)/$(PYTHON_INCLUDE_DIR)" \
-	$(HOST_DIR)/bin/python ./setup.py $(SILENT_OPT) build --executable=/usr/bin/python
+	$(HOST_DIR)/bin/python ./setup.py -q build --executable=/usr/bin/python
 
 PYTHON_INSTALL = \
 	CC="$(TARGET)-gcc" \
@@ -20,13 +20,13 @@ PYTHON_INSTALL = \
 	LDSHARED="$(TARGET)-gcc -shared" \
 	PYTHONPATH=$(TARGET_DIR)/$(PYTHON_DIR)/site-packages \
 	CPPFLAGS="$(TARGET_CPPFLAGS) -I$(TARGET_DIR)/$(PYTHON_INCLUDE_DIR)" \
-	$(HOST_DIR)/bin/python ./setup.py $(SILENT_OPT) install --root=$(TARGET_DIR) --prefix=/usr
+	$(HOST_DIR)/bin/python ./setup.py -q install --root=$(TARGET_DIR) --prefix=/usr
 
 #
 # host_python
 #
 PYTHON_VER_MAJOR = 2.7
-PYTHON_VER_MINOR = 12
+PYTHON_VER_MINOR = 13
 PYTHON_VER = $(PYTHON_VER_MAJOR).$(PYTHON_VER_MINOR)
 PYTHON_SOURCE = Python-$(PYTHON_VER).tar.xz
 HOST_PYTHON_PATCH = python-$(PYTHON_VER).patch
@@ -39,7 +39,7 @@ $(D)/host_python: $(ARCHIVE)/$(PYTHON_SOURCE)
 	$(REMOVE)/Python-$(PYTHON_VER)
 	$(UNTAR)/$(PYTHON_SOURCE)
 	set -e; cd $(BUILD_TMP)/Python-$(PYTHON_VER); \
-		$(call post_patch,$(HOST_PYTHON_PATCH)); \
+		$(call apply_patches,$(HOST_PYTHON_PATCH)); \
 		autoconf; \
 		CONFIG_SITE= \
 		OPT="$(HOST_CFLAGS)" \
@@ -76,7 +76,7 @@ $(D)/python: $(D)/bootstrap $(D)/host_python $(D)/ncurses $(D)/zlib $(D)/openssl
 	$(REMOVE)/Python-$(PYTHON_VER)
 	$(UNTAR)/$(PYTHON_SOURCE)
 	set -e; cd $(BUILD_TMP)/Python-$(PYTHON_VER); \
-		$(call post_patch,$(PYTHON_PATCH)); \
+		$(call apply_patches,$(PYTHON_PATCH)); \
 		CONFIG_SITE= \
 		$(BUILDENV) \
 		autoreconf --verbose --install --force Modules/_ctypes/libffi; \
@@ -201,7 +201,7 @@ $(D)/python_lxml: $(D)/bootstrap $(D)/python $(D)/libxslt $(D)/python_setuptools
 #
 # python_twisted
 #
-PYTHON_TWISTED_VER = 16.0.0
+PYTHON_TWISTED_VER = 16.4.0
 PYTHON_TWISTED_SOURCE = Twisted-$(PYTHON_TWISTED_VER).tar.bz2
 
 $(ARCHIVE)/$(PYTHON_TWISTED_SOURCE):
@@ -232,7 +232,7 @@ $(D)/python_imaging: $(D)/bootstrap $(D)/libjpeg $(D)/freetype $(D)/python $(D)/
 	$(REMOVE)/Imaging-$(PYTHON_IMAGING_VER)
 	$(UNTAR)/$(PYTHON_IMAGING_SOURCE)
 	set -e; cd $(BUILD_TMP)/Imaging-$(PYTHON_IMAGING_VER); \
-		$(call post_patch,$(PYTHON_IMAGING_PATCH)); \
+		$(call apply_patches,$(PYTHON_IMAGING_PATCH)); \
 		sed -ie "s|"darwin"|"darwinNot"|g" "setup.py"; \
 		sed -ie "s|ZLIB_ROOT = None|ZLIB_ROOT = libinclude(\"${TARGET_DIR}/usr\")|" "setup.py"; \
 		$(PYTHON_BUILD); \
@@ -255,7 +255,7 @@ $(D)/python_pycrypto: $(D)/bootstrap $(D)/python $(D)/python_setuptools $(ARCHIV
 	$(REMOVE)/pycrypto-$(PYTHON_PYCRYPTO_VER)
 	$(UNTAR)/$(PYTHON_PYCRYPTO_SOURCE)
 	set -e; cd $(BUILD_TMP)/pycrypto-$(PYTHON_PYCRYPTO_VER); \
-		$(call post_patch,$(PYTHON_PYCRYPTO_PATCH)); \
+		$(call apply_patches,$(PYTHON_PYCRYPTO_PATCH)); \
 		export ac_cv_func_malloc_0_nonnull=yes; \
 		$(CONFIGURE) \
 			--prefix=/usr \
@@ -287,7 +287,7 @@ $(D)/python_pyusb: $(D)/bootstrap $(D)/python $(D)/python_setuptools $(ARCHIVE)/
 #
 # python_ipaddress
 #
-PYTHON_IPADDRESS_VER = 1.0.17
+PYTHON_IPADDRESS_VER = 1.0.18
 PYTHON_IPADDRESS_SOURCE = ipaddress-$(PYTHON_IPADDRESS_VER).tar.gz
 
 $(ARCHIVE)/$(PYTHON_IPADDRESS_SOURCE):
@@ -451,7 +451,7 @@ $(D)/python_pyopenssl: $(D)/bootstrap $(D)/python $(D)/python_setuptools $(ARCHI
 	$(REMOVE)/pyOpenSSL-$(PYTHON_PYOPENSSL_VER)
 	$(UNTAR)/$(PYTHON_PYOPENSSL_SOURCE)
 	set -e; cd $(BUILD_TMP)/pyOpenSSL-$(PYTHON_PYOPENSSL_VER); \
-		$(call post_patch,$(PYTHON_PYOPENSSL_PATCH)); \
+		$(call apply_patches,$(PYTHON_PYOPENSSL_PATCH)); \
 		$(PYTHON_BUILD); \
 		$(PYTHON_INSTALL)
 	$(REMOVE)/pyOpenSSL-$(PYTHON_PYOPENSSL_VER)
@@ -472,7 +472,7 @@ $(D)/python_service_identity: $(D)/bootstrap $(D)/python $(D)/python_setuptools 
 	$(REMOVE)/service_identity-$(PYTHON_SERVICE_IDENTITY_VER)
 	$(UNTAR)/$(PYTHON_SERVICE_IDENTITY_SOURCE)
 	set -e; cd $(BUILD_TMP)/service_identity-$(PYTHON_SERVICE_IDENTITY_VER); \
-		$(call post_patch,$(PYTHON_SERVICE_IDENTITY_PATCH)); \
+		$(call apply_patches,$(PYTHON_SERVICE_IDENTITY_PATCH)); \
 		$(PYTHON_BUILD); \
 		$(PYTHON_INSTALL)
 	$(REMOVE)/service_identity-$(PYTHON_SERVICE_IDENTITY_VER)
@@ -747,4 +747,3 @@ PYTHON_DEPS += $(D)/python_livestreamersrv
 python-all: $(PYTHON_DEPS)
 
 PHONY += python-all
-

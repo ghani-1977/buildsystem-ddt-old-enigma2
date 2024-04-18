@@ -1,12 +1,29 @@
 #
 # KERNEL
 #
+ifeq ($(BOXTYPE), hd51)
 KERNEL_VER             = 4.10.12
-KERNEL_DATE            = 20170524
+KERNEL_DATE            = 20171103
 KERNEL_TYPE            = hd51
 KERNEL_SRC             = linux-$(KERNEL_VER)-arm.tar.gz
-KERNEL_CONFIG          = defconfig
+KERNEL_URL             = http://source.mynonpublic.com/gfutures
+KERNEL_CONFIG          = hd51_defconfig
 KERNEL_DIR             = $(BUILD_TMP)/linux-$(KERNEL_VER)
+KERNEL_PATCHES_ARM     = $(HD51_PATCHES)
+KERNEL_DTB_VER         = bcm7445-bcm97445svmb.dtb
+endif
+
+ifeq ($(BOXTYPE), vusolo4k)
+KERNEL_VER             = 3.14.28-1.8
+KERNEL_TYPE            = vusolo4k
+KERNEL_SRC_VER         = 3.14-1.8
+KERNEL_SRC             = stblinux-${KERNEL_SRC_VER}.tar.bz2
+KERNEL_URL             = http://archive.vuplus.com/download/kernel
+KERNEL_CONFIG          = vusolo4k_defconfig
+KERNEL_DIR             = $(BUILD_TMP)/linux
+KERNEL_PATCHES_ARM     = $(VUSOLO4K_PATCHES)
+endif
+
 #
 # Todo: findkerneldevice.py
 
@@ -15,22 +32,40 @@ DEPMOD = $(HOST_DIR)/bin/depmod
 #
 # Patches Kernel
 #
-KERNEL_PATCHES = \
-		armbox/TBS-fixes-for-4.10-kernel.patch \
-		armbox/0001-Support-TBS-USB-drivers-for-4.6-kernel.patch \
-		armbox/0001-TBS-fixes-for-4.6-kernel.patch \
-		armbox/0001-STV-Add-PLS-support.patch \
-		armbox/0001-STV-Add-SNR-Signal-report-parameters.patch \
-		armbox/blindscan2.patch \
-		armbox/0001-stv090x-optimized-TS-sync-control.patch \
-		armbox/reserve_dvb_adapter_0.patch \
-		armbox/blacklist_mmc0.patch
+COMMON_PATCHES_ARM = \
+
+HD51_PATCHES = \
+		armbox/hd51_TBS-fixes-for-4.10-kernel.patch \
+		armbox/hd51_0001-Support-TBS-USB-drivers-for-4.6-kernel.patch \
+		armbox/hd51_0001-TBS-fixes-for-4.6-kernel.patch \
+		armbox/hd51_0001-STV-Add-PLS-support.patch \
+		armbox/hd51_0001-STV-Add-SNR-Signal-report-parameters.patch \
+		armbox/hd51_blindscan2.patch \
+		armbox/hd51_0001-stv090x-optimized-TS-sync-control.patch \
+		armbox/hd51_reserve_dvb_adapter_0.patch \
+		armbox/hd51_blacklist_mmc0.patch \
+		armbox/hd51_export_pmpoweroffprepare.patch
+
+VUSOLO4K_PATCHES = \
+		armbox/vusolo4k_bcm_genet_disable_warn.patch \
+		armbox/vusolo4k_linux_dvb-core.patch \
+		armbox/vusolo4k_rt2800usb_fix_warn_tx_status_timeout_to_dbg.patch \
+		armbox/vusolo4k_usb_core_hub_msleep.patch \
+		armbox/vusolo4k_rtl8712_fix_build_error.patch \
+		armbox/vusolo4k_0001-Support-TBS-USB-drivers.patch \
+		armbox/vusolo4k_0001-STV-Add-PLS-support.patch \
+		armbox/vusolo4k_0001-STV-Add-SNR-Signal-report-parameters.patch \
+		armbox/vusolo4k_0001-stv090x-optimized-TS-sync-control.patch \
+		armbox/vusolo4k_linux_dvb_adapter.patch \
+		armbox/vusolo4k_kernel-gcc6.patch
 
 #
 # KERNEL
 #
+KERNEL_PATCHES = $(KERNEL_PATCHES_ARM)
+
 $(ARCHIVE)/$(KERNEL_SRC):
-	$(WGET) http://source.mynonpublic.com/gfutures/$(KERNEL_SRC)
+	$(WGET) $(KERNEL_URL)/$(KERNEL_SRC)
 
 $(D)/kernel.do_prepare: $(ARCHIVE)/$(KERNEL_SRC) $(PATCHES)/armbox/$(KERNEL_CONFIG)
 	$(START_BUILD)
@@ -52,21 +87,42 @@ endif
 	@touch $@
 
 $(D)/kernel.do_compile: $(D)/kernel.do_prepare
+ifeq ($(BOXTYPE), hd51)
+	set -e; cd $(KERNEL_DIR); \
+		$(MAKE) -C $(KERNEL_DIR) ARCH=arm oldconfig
+		$(MAKE) -C $(KERNEL_DIR) ARCH=arm CROSS_COMPILE=$(TARGET)- $(KERNEL_DTB_VER) zImage modules
+		$(MAKE) -C $(KERNEL_DIR) ARCH=arm CROSS_COMPILE=$(TARGET)- DEPMOD=$(DEPMOD) INSTALL_MOD_PATH=$(TARGET_DIR) modules_install
+	@touch $@
+endif
+ifeq ($(BOXTYPE), vusolo4k)
 	set -e; cd $(KERNEL_DIR); \
 		$(MAKE) -C $(KERNEL_DIR) ARCH=arm oldconfig
 		$(MAKE) -C $(KERNEL_DIR) ARCH=arm CROSS_COMPILE=$(TARGET)- zImage modules
 		$(MAKE) -C $(KERNEL_DIR) ARCH=arm CROSS_COMPILE=$(TARGET)- DEPMOD=$(DEPMOD) INSTALL_MOD_PATH=$(TARGET_DIR) modules_install
 	@touch $@
+endif
 
 KERNEL = $(D)/kernel
 $(D)/kernel: $(D)/bootstrap $(D)/kernel.do_compile
+ifeq ($(BOXTYPE), hd51)
 	install -m 644 $(KERNEL_DIR)/arch/arm/boot/zImage $(BOOT_DIR)/vmlinux.ub
+	install -m 644 $(KERNEL_DIR)/vmlinux $(TARGET_DIR)/boot/vmlinux-arm-$(KERNEL_VER)
+	install -m 644 $(KERNEL_DIR)/System.map $(TARGET_DIR)/boot/System.map-arm-$(KERNEL_VER)
+	cp $(KERNEL_DIR)/arch/arm/boot/zImage $(TARGET_DIR)/boot/
+	cat $(KERNEL_DIR)/arch/arm/boot/zImage $(KERNEL_DIR)/arch/arm/boot/dts/$(KERNEL_DTB_VER) > $(TARGET_DIR)/boot/zImage.dtb
+	rm $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/build || true
+	rm $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/source || true
+	$(TOUCH)
+endif
+ifeq ($(BOXTYPE), vusolo4k)
+	install -m 644 $(KERNEL_DIR)/arch/arm/boot/zImage $(BOOT_DIR)/vmlinux
 	install -m 644 $(KERNEL_DIR)/vmlinux $(TARGET_DIR)/boot/vmlinux-arm-$(KERNEL_VER)
 	install -m 644 $(KERNEL_DIR)/System.map $(TARGET_DIR)/boot/System.map-arm-$(KERNEL_VER)
 	cp $(KERNEL_DIR)/arch/arm/boot/zImage $(TARGET_DIR)/boot/
 	rm $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/build || true
 	rm $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/source || true
 	$(TOUCH)
+endif
 
 $(D)/kernel-headers: $(D)/kernel.do_prepare
 	$(START_BUILD)
@@ -98,4 +154,4 @@ kernel.%: $(D)/kernel
 	@echo "You have to edit $(PATCHES)/armbox/$(KERNEL_CONFIG) m a n u a l l y to make changes permanent !!!"
 	@echo ""
 	diff $(KERNEL_DIR)/.config.old $(KERNEL_DIR)/.config
-	@echo ""
+	@echo "".

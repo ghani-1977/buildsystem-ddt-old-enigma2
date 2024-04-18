@@ -5,7 +5,7 @@
 #
 # release_cube_common
 #
-neutrino_release_cube_common:
+neutrino-release-cube_common:
 	install -m 0755 $(SKEL_ROOT)/release/halt_cuberevo $(RELEASE_DIR)/etc/init.d/halt
 	install -m 0777 $(SKEL_ROOT)/release/reboot_cuberevo $(RELEASE_DIR)/etc/init.d/reboot
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/stgfb/stmfb/stmcore-display-stx7109c3.ko $(RELEASE_DIR)/lib/modules/
@@ -18,54 +18,54 @@ neutrino_release_cube_common:
 #
 # release_cube_common_tuner
 #
-neutrino_release_cube_common_tuner:
+neutrino-release-cube_common_tuner:
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/multituner/*.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/media/dvb/frontends/dvb-pll.ko $(RELEASE_DIR)/lib/modules/
 
 #
 # cuberevo_9500hd
 #
-neutrino_release_cuberevo_9500hd: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo_9500hd: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # cuberevo_2000hd
 #
-neutrino_release_cuberevo_2000hd: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo_2000hd: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # cuberevo_250hd
 #
-neutrino_release_cuberevo_250hd: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo_250hd: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # cuberevo_mini_fta
 #
-neutrino_release_cuberevo_mini_fta: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo_mini_fta: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # cuberevo_mini2
 #
-neutrino_release_cuberevo_mini2: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo_mini2: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # cuberevo_mini
 #
-neutrino_release_cuberevo_mini: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo_mini: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # cuberevo
 #
-neutrino_release_cuberevo: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # cuberevo_3000hd
 #
-neutrino_release_cuberevo_3000hd: neutrino_release_cube_common neutrino_release_cube_common_tuner
+neutrino-release-cuberevo_3000hd: neutrino-release-cube_common neutrino-release-cube_common_tuner
 
 #
 # common_ipbox
 #
-neutrino_release_common_ipbox:
+neutrino-release-common_ipbox:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ipbox $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/stgfb/stmfb/stmcore-display-stx7109c3.ko $(RELEASE_DIR)/lib/modules/
@@ -83,7 +83,7 @@ neutrino_release_common_ipbox:
 #
 # ipbox9900
 #
-neutrino_release_ipbox9900: neutrino_release_common_ipbox
+neutrino-release-ipbox9900: neutrino-release-common_ipbox
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/ipbox99xx/micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/rmu/rmu.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/ipbox99xx_fan/ipbox_fan.ko $(RELEASE_DIR)/lib/modules/
@@ -92,7 +92,7 @@ neutrino_release_ipbox9900: neutrino_release_common_ipbox
 #
 # ipbox99
 #
-neutrino_release_ipbox99: neutrino_release_common_ipbox
+neutrino-release-ipbox99: neutrino-release-common_ipbox
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/ipbox99xx/micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/ipbox99xx_fan/ipbox_fan.ko $(RELEASE_DIR)/lib/modules/
 	cp -p $(SKEL_ROOT)/release/tvmode_ipbox $(RELEASE_DIR)/usr/bin/tvmode
@@ -100,14 +100,14 @@ neutrino_release_ipbox99: neutrino_release_common_ipbox
 #
 # ipbox55
 #
-neutrino_release_ipbox55: neutrino_release_common_ipbox
+neutrino-release-ipbox55: neutrino-release-common_ipbox
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/ipbox55/front.ko $(RELEASE_DIR)/lib/modules/
 	cp -p $(SKEL_ROOT)/release/tvmode_ipbox55 $(RELEASE_DIR)/usr/bin/tvmode
 
 #
 # ufs910
 #
-neutrino_release_ufs910:
+neutrino-release-ufs910:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ufs $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/vfd/vfd.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -121,7 +121,7 @@ neutrino_release_ufs910:
 #
 # ufs912
 #
-neutrino_release_ufs912:
+neutrino-release-ufs912:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ufs912 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/micom/micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -133,7 +133,7 @@ neutrino_release_ufs912:
 #
 # ufs913
 #
-neutrino_release_ufs913:
+neutrino-release-ufs913:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ufs912 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/micom/micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/multituner/*.ko $(RELEASE_DIR)/lib/modules/
@@ -146,7 +146,7 @@ neutrino_release_ufs913:
 #
 # ufs922
 #
-neutrino_release_ufs922:
+neutrino-release-ufs922:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ufs $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/micom/micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -162,7 +162,7 @@ neutrino_release_ufs922:
 #
 # ufc960
 #
-neutrino_release_ufc960:
+neutrino-release-ufc960:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ufs $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/micom/micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -175,7 +175,7 @@ neutrino_release_ufc960:
 #
 # spark
 #
-neutrino_release_spark:
+neutrino-release-spark:
 	install -m 0755 $(SKEL_ROOT)/release/halt_spark $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/aotom_spark/aotom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/lnb/lnb.ko $(RELEASE_DIR)/lib/modules/
@@ -190,7 +190,7 @@ neutrino_release_spark:
 #
 # spark7162
 #
-neutrino_release_spark7162:
+neutrino-release-spark7162:
 	install -m 0755 $(SKEL_ROOT)/release/halt_spark7162 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/aotom_spark/aotom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/stgfb/stmfb/stmcore-display-sti7105.ko $(RELEASE_DIR)/lib/modules/
@@ -206,7 +206,7 @@ neutrino_release_spark7162:
 #
 # fortis_hdbox
 #
-neutrino_release_fortis_hdbox:
+neutrino-release-fortis_hdbox:
 	install -m 0755 $(SKEL_ROOT)/release/halt_fortis_hdbox $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -217,7 +217,7 @@ neutrino_release_fortis_hdbox:
 #
 # atevio7500
 #
-neutrino_release_atevio7500:
+neutrino-release-atevio7500:
 	install -m 0755 $(SKEL_ROOT)/release/halt_fortis_hdbox $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/multituner/*.ko $(RELEASE_DIR)/lib/modules/
@@ -233,7 +233,7 @@ neutrino_release_atevio7500:
 #
 # octagon1008
 #
-neutrino_release_octagon1008:
+neutrino-release-octagon1008:
 	install -m 0755 $(SKEL_ROOT)/release/halt_octagon1008 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -246,7 +246,7 @@ neutrino_release_octagon1008:
 #
 # hs7110
 #
-neutrino_release_hs7110:
+neutrino-release-hs7110:
 	install -m 0755 $(SKEL_ROOT)/release/halt_hs7110 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/lnb/lnb.ko $(RELEASE_DIR)/lib/modules/
@@ -259,7 +259,7 @@ neutrino_release_hs7110:
 #
 # hs7420
 #
-neutrino_release_hs7420:
+neutrino-release-hs7420:
 	install -m 0755 $(SKEL_ROOT)/release/halt_hs742x $(RELEASE_DIR)/etc/init.d/halt
 	chmod 755 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
@@ -273,7 +273,7 @@ neutrino_release_hs7420:
 #
 # hs7429
 #
-neutrino_release_hs7429:
+neutrino-release-hs7429:
 	install -m 0755 $(SKEL_ROOT)/release/halt_hs742x $(RELEASE_DIR)/etc/init.d/halt
 	chmod 755 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
@@ -287,7 +287,7 @@ neutrino_release_hs7429:
 #
 # hs7810a
 #
-neutrino_release_hs7810a:
+neutrino-release-hs7810a:
 	install -m 0755 $(SKEL_ROOT)/release/halt_hs7810a $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/lnb/lnb.ko $(RELEASE_DIR)/lib/modules/
@@ -300,7 +300,7 @@ neutrino_release_hs7810a:
 #
 # hs7119
 #
-neutrino_release_hs7119:
+neutrino-release-hs7119:
 	install -m 0755 $(SKEL_ROOT)/release/halt_hs7119 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/lnb/lnb.ko $(RELEASE_DIR)/lib/modules/
@@ -313,7 +313,7 @@ neutrino_release_hs7119:
 #
 # hs7819
 #
-neutrino_release_hs7819:
+neutrino-release-hs7819:
 	install -m 0755 $(SKEL_ROOT)/release/halt_hs7819 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/nuvoton/nuvoton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/lnb/lnb.ko $(RELEASE_DIR)/lib/modules/
@@ -326,7 +326,7 @@ neutrino_release_hs7819:
 #
 # atemio520
 #
-neutrino_release_atemio520:
+neutrino-release-atemio520:
 	install -m 0755 $(SKEL_ROOT)/release/halt_atemio520 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/cn_micom/cn_micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/lnb/lnb.ko $(RELEASE_DIR)/lib/modules/
@@ -339,7 +339,7 @@ neutrino_release_atemio520:
 #
 # atemio530
 #
-neutrino_release_atemio530:
+neutrino-release-atemio530:
 	install -m 0755 $(SKEL_ROOT)/release/halt_atemio530 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/cn_micom/cn_micom.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/lnb/lnb.ko $(RELEASE_DIR)/lib/modules/
@@ -352,7 +352,7 @@ neutrino_release_atemio530:
 #
 # hl101
 #
-neutrino_release_hl101:
+neutrino-release-hl101:
 	install -m 0755 $(SKEL_ROOT)/release/halt_hl101 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/proton/proton.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -368,7 +368,7 @@ neutrino_release_hl101:
 #
 # adb_box
 #
-neutrino_release_adb_box:
+neutrino-release-adb_box:
 	install -m 0755 $(SKEL_ROOT)/release/halt_adb_box $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/adb_box_vfd/vfd.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -388,7 +388,7 @@ neutrino_release_adb_box:
 #
 # tf7700
 #
-neutrino_release_tf7700:
+neutrino-release-tf7700:
 	install -m 0755 $(SKEL_ROOT)/release/halt_tf7700 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/tffp/tffp.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
@@ -402,7 +402,7 @@ neutrino_release_tf7700:
 #
 # vitamin_hd5000
 #
-neutrino_release_vitamin_hd5000:
+neutrino-release-vitamin_hd5000:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ufs912 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/stgfb/stmfb/stmcore-display-sti7111.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/vitamin_hd5000/micom.ko $(RELEASE_DIR)/lib/modules/
@@ -415,7 +415,7 @@ neutrino_release_vitamin_hd5000:
 #
 # sagemcom88
 #
-neutrino_release_sagemcom88:
+neutrino-release-sagemcom88:
 	install -m 0755 $(SKEL_ROOT)/release/halt_ufs912 $(RELEASE_DIR)/etc/init.d/halt
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/stgfb/stmfb/stmcore-display-sti7105.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/front_led/front_led.ko $(RELEASE_DIR)/lib/modules/
@@ -431,7 +431,7 @@ neutrino_release_sagemcom88:
 #
 # arivalink200
 #
-neutrino_release_arivalink200:
+neutrino-release-arivalink200:
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/stgfb/stmfb/stmcore-display-stx7109c3.ko $(RELEASE_DIR)/lib/modules/
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontends/*.ko $(RELEASE_DIR)/lib/modules/
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/front_ArivaLink200/vfd.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/frontcontroller/front_ArivaLink200/vfd.ko $(RELEASE_DIR)/lib/modules/ || true
@@ -442,32 +442,47 @@ neutrino_release_arivalink200:
 	cp -dp $(SKEL_ROOT)/release/lircd_arivalink200.conf $(RELEASE_DIR)/etc/lircd.conf
 
 #
-# neutrino_release_base
+# Mutant HD51
+#
+neutrino-release-hd51:
+	install -m 0755 $(SKEL_ROOT)/release/halt_hd51 $(RELEASE_DIR)/etc/init.d/halt
+	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/*.ko $(RELEASE_DIR)/lib/modules/
+	cp $(TARGET_DIR)/boot/zImage.dtb $(RELEASE_DIR)/boot/
+	install -m 0644 $(SKEL_ROOT)/release/mdev_hd51.conf $(RELEASE_DIR)/etc/mdev.conf
+	install -m 0644 $(SKEL_ROOT)/release/tangos_hd51.m2v $(RELEASE_DIR)/share/tuxbox/neutrino/icons/bootlogo.m2v
+	find $(RELEASE_DIR)/usr/lib/ -name '*.a' -exec rm -f {} \;
+	find $(RELEASE_DIR)/usr/lib/ -name '*.o' -exec rm -f {} \;
+	find $(RELEASE_DIR)/usr/lib/ -name '*.la' -exec rm -f {} \;
+
+#
+# neutrino-release-base
 #
 # the following target creates the common file base
-neutrino_release_base:
+neutrino-release-base:
 	rm -rf $(RELEASE_DIR) || true
 	install -d $(RELEASE_DIR)
 	install -d $(RELEASE_DIR)/{autofs,bin,boot,dev,dev.static,etc,hdd,lib,media,mnt,proc,ram,root,sbin,swap,sys,tmp,usr,var}
-	install -d $(RELEASE_DIR)/etc/{init.d,network,mdev}
+	install -d $(RELEASE_DIR)/etc/{init.d,network,mdev,ssl}
 	install -d $(RELEASE_DIR)/etc/network/if-{post-{up,down},pre-{up,down},up,down}.d
-	install -d $(RELEASE_DIR)/lib/{modules,udev,firmware}
+	install -d $(RELEASE_DIR)/lib/{modules,udev,firmware,tuxbox}
+	install -d $(RELEASE_DIR)/lib/tuxbox/plugins
 	install -d $(RELEASE_DIR)/media/{dvd,nfs,usb,sda1,sdb1}
 	ln -sf /hdd $(RELEASE_DIR)/media/hdd
 	install -d $(RELEASE_DIR)/mnt/{hdd,nfs,usb}
 	install -d $(RELEASE_DIR)/mnt/mnt{0..7}
-	install -d $(RELEASE_DIR)/usr/{bin,lib,local,sbin,share}
+	install -d $(RELEASE_DIR)/usr/{bin,lib,local,sbin}
 	install -d $(RELEASE_DIR)/usr/local/{bin,sbin}
-	install -d $(RELEASE_DIR)/usr/share/{fonts,tuxbox,udhcpc,zoneinfo}
-	install -d $(RELEASE_DIR)/usr/share/tuxbox/neutrino
-	install -d $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/logo
-	ln -sf /usr/share/tuxbox/neutrino/icons/logo $(RELEASE_DIR)/logos
-	ln -sf /usr/share $(RELEASE_DIR)/share
-	install -d $(RELEASE_DIR)/var/{bin,boot,emu,etc,epg,httpd,keys,lib,net,tuxbox,update}
+	install -d $(RELEASE_DIR)/share/{fonts,tuxbox,udhcpc,zoneinfo,lua}
+	install -d $(RELEASE_DIR)/share/tuxbox/neutrino
+	install -d $(RELEASE_DIR)/share/tuxbox/neutrino/icons/logo
+	install -d $(RELEASE_DIR)/share/lua/5.2
+	ln -sf /share/tuxbox/neutrino/icons/logo $(RELEASE_DIR)/logos
+	ln -sf /share $(RELEASE_DIR)/usr
+	install -d $(RELEASE_DIR)/var/{bin,boot,emu,etc,epg,httpd,keys,lib,logos,net,tuxbox,update}
 	install -d $(RELEASE_DIR)/var/lib/{nfs,modules}
 	install -d $(RELEASE_DIR)/var/net/epg
-	install -d $(RELEASE_DIR)/var/tuxbox/{config,locale,plugins,themes}
-	install -d $(RELEASE_DIR)/var/tuxbox/plugins/webtv
+	install -d $(RELEASE_DIR)/var/tuxbox/{config,fonts,locale,plugins,themes}
+	install -d $(RELEASE_DIR)/var/tuxbox/webtv
 	install -d $(RELEASE_DIR)/var/tuxbox/config/{webtv,zapit}
 	mkdir -p $(RELEASE_DIR)/etc/rc.d/rc0.d
 	ln -s ../init.d/sendsigs $(RELEASE_DIR)/etc/rc.d/rc0.d/S20sendsigs
@@ -477,23 +492,23 @@ neutrino_release_base:
 	ln -s ../init.d/sendsigs $(RELEASE_DIR)/etc/rc.d/rc6.d/S20sendsigs
 	ln -s ../init.d/umountfs $(RELEASE_DIR)/etc/rc.d/rc6.d/S40umountfs
 	ln -s ../init.d/reboot $(RELEASE_DIR)/etc/rc.d/rc6.d/S90reboot
-	ln -sf /usr/share/tuxbox/neutrino/icons/logo $(RELEASE_DIR)/var/httpd/logos
+	ln -sf /share/tuxbox/neutrino/icons/logo $(RELEASE_DIR)/var/httpd/logos
 	touch $(RELEASE_DIR)/var/etc/.firstboot
 	cp -a $(TARGET_DIR)/bin/* $(RELEASE_DIR)/bin/
 	cp -a $(TARGET_DIR)/usr/bin/* $(RELEASE_DIR)/usr/bin/
 	cp -a $(TARGET_DIR)/sbin/* $(RELEASE_DIR)/sbin/
 	cp -a $(TARGET_DIR)/usr/sbin/* $(RELEASE_DIR)/usr/sbin/
-	cp -dp $(TARGET_DIR)/var/etc/.version $(RELEASE_DIR)/
+	cp -dp $(TARGET_DIR)/.version $(RELEASE_DIR)/
 	ln -sf /.version $(RELEASE_DIR)/var/etc/.version
-	cp $(TARGET_DIR)/boot/uImage $(RELEASE_DIR)/boot/
+	cp $(TARGET_DIR)/boot/$(KERNELNAME) $(RELEASE_DIR)/boot/
 	ln -sf /proc/mounts $(RELEASE_DIR)/etc/mtab
 	cp -dp $(SKEL_ROOT)/sbin/MAKEDEV $(RELEASE_DIR)/sbin/
 	ln -sf ../sbin/MAKEDEV $(RELEASE_DIR)/dev/MAKEDEV
 	ln -sf ../../sbin/MAKEDEV $(RELEASE_DIR)/lib/udev/MAKEDEV
 	cp -aR $(SKEL_ROOT)/etc/mdev/* $(RELEASE_DIR)/etc/mdev/
 	cp -aR $(SKEL_ROOT)/etc/mdev.conf $(RELEASE_DIR)/etc/mdev.conf
-	cp -aR $(SKEL_ROOT)/usr/share/udhcpc/* $(RELEASE_DIR)/usr/share/udhcpc/
-	cp -aR $(SKEL_ROOT)/usr/share/zoneinfo/* $(RELEASE_DIR)/usr/share/zoneinfo/
+	cp -aR $(SKEL_ROOT)/usr/share/udhcpc/* $(RELEASE_DIR)/share/udhcpc/
+	cp -aR $(SKEL_ROOT)/usr/share/zoneinfo/* $(RELEASE_DIR)/share/zoneinfo/
 	cp $(SKEL_ROOT)/bin/autologin $(RELEASE_DIR)/bin/
 	cp $(SKEL_ROOT)/bin/vdstandby $(RELEASE_DIR)/bin/
 	cp $(SKEL_ROOT)/usr/sbin/fw_printenv $(RELEASE_DIR)/usr/sbin/
@@ -507,6 +522,11 @@ ifeq ($(BOXTYPE), $(filter $(BOXTYPE), atevio7500 fortis_hdbox octagon1008 ufs91
 	cp $(SKEL_ROOT)/release/fw_env.config_$(BOXTYPE) $(RELEASE_DIR)/etc/fw_env.config
 endif
 	install -m 0755 $(SKEL_ROOT)/release/rcS_neutrino_$(BOXTYPE) $(RELEASE_DIR)/etc/init.d/rcS
+#
+#
+################################################################################
+ifeq ($(BOXARCH), sh4)
+################################################################################
 #
 # player
 #
@@ -552,24 +572,6 @@ endif
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/embxshm/embxshm.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/embxshm/embxshm.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/mme/mme_host.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/mme/mme_host.ko $(RELEASE_DIR)/lib/modules/ || true
 #
-# multicom 406
-#
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/embx/embx.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/embx/embx.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/embxmailbox/embxmailbox.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/embxmailbox/embxmailbox.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/embxshm/embxshm.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/embxshm/embxshm.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/ics/ics.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/ics/ics.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/ics/ics_user.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/ics/ics_user.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/mme/mme.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/mme/mme.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/mme/mme_user.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/multicom/src/mme/mme_user.ko $(RELEASE_DIR)/lib/modules/ || true
-#
-# infrastructure
-#
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/event/stm_event.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/event/stm_event.ko $(RELEASE_DIR)/lib/modules || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/memsink/stm_memsink.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/memsink/stm_memsink.ko $(RELEASE_DIR)/lib/modules || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/memsrc/stm_memsrc.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/memsrc/stm_memsrc.ko $(RELEASE_DIR)/lib/modules || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/registry/stm_registry.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/registry/stm_registry.ko $(RELEASE_DIR)/lib/modules || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/wrapper/stm_wrapper.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/infrastructure/linux/wrapper/stm_wrapper.ko $(RELEASE_DIR)/lib/modules || true
-#
 #
 #
 	cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/simu_button/simu_button.ko $(RELEASE_DIR)/lib/modules/
@@ -583,23 +585,21 @@ endif
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/pti/pti.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/pti/pti.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/pti_np/pti.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/pti_np/pti.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/smartcard/smartcard.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/smartcard/smartcard.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/sata_switch/sata.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/sata_switch/sata.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/mini_fo/mini_fo.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/mini_fo/mini_fo.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/autofs4/autofs4.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/autofs4/autofs4.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/tun.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/tun.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/ftdi_sio.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/ftdi_sio.ko $(RELEASE_DIR)/lib/modules/ftdi_sio.ko || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/pl2303.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/pl2303.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/usbserial.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/usbserial.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/fuse/fuse.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/fuse/fuse.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/ntfs/ntfs.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/ntfs/ntfs.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/cifs/cifs.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/cifs/cifs.ko $(RELEASE_DIR)/lib/modules/ || true
-ifneq ($(BOXTYPE), $(filter $(BOXTYPE), ufs910 ufs922))
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/jfs/jfs.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/jfs/jfs.ko $(RELEASE_DIR)/lib/modules/ || true
-endif
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/nfsd/nfsd.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/nfsd/nfsd.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/exportfs/exportfs.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/exportfs/exportfs.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/nfs_common/nfs_acl.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/nfs_common/nfs_acl.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/nfs/nfs.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/nfs/nfs.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/sata_switch/sata.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/sata_switch/sata.ko $(RELEASE_DIR)/lib/modules/ || true
-	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/mini_fo/mini_fo.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/fs/mini_fo/mini_fo.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/usbserial.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/usbserial.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/ftdi_sio.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/ftdi_sio.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/pl2303.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/pl2303.ko $(RELEASE_DIR)/lib/modules/ || true
 #
 # wlan
 #
@@ -611,12 +611,51 @@ endif
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/wireless/rtl8188eu/8188eu.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/wireless/rtl8188eu/8188eu.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/wireless/rtl8192cu/8192cu.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/wireless/rtl8192cu/8192cu.ko $(RELEASE_DIR)/lib/modules/ || true
 	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/wireless/rtl8192du/8192du.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/extra/wireless/rtl8192du/8192du.ko $(RELEASE_DIR)/lib/modules/ || true
-ifeq ($(IMAGE), $(filter $(IMAGE), enigma2-wlandriver neutrino-wlandriver))
-	install -d $(RELEASE_DIR)/etc/Wireless
-	cp -aR $(SKEL_ROOT)/firmware/Wireless/* $(RELEASE_DIR)/etc/Wireless/
-	cp -aR $(SKEL_ROOT)/firmware/rtlwifi $(RELEASE_DIR)/lib/firmware/
-	cp -aR $(SKEL_ROOT)/firmware/*.bin $(RELEASE_DIR)/lib/firmware/
 endif
+#
+#
+################################################################################
+ifeq ($(BOXARCH), arm)
+################################################################################
+#
+#
+#
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/usbserial.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/usbserial.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/ftdi_sio.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/ftdi_sio.ko $(RELEASE_DIR)/lib/modules/ftdi_sio.ko || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/pl2303.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/usb/serial/pl2303.ko $(RELEASE_DIR)/lib/modules/ || true
+#
+# wlan
+#
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8188eu/r8188eu.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8188eu/r8188eu.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/net/wireless/cfg80211.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/net/wireless/cfg80211.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/net/rfkill/rfkill.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/net/rfkill/rfkill.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/net/mac80211/mac80211.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/net/mac80211/mac80211.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtlwifi.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtlwifi.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtl_usb.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtl_usb.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtl8192c/rtl8192c-common.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtl8192c/rtl8192c-common.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtl8192cu/rtl8192cu.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtlwifi/rtl8192cu/rtl8192cu.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8712/r8712u.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8712/r8712u.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/mediatek/mt7601u/mt7601u.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/mediatek/mt7601u/mt7601u.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8712/r8712u.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8712/r8712u.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8192u/r8192u_usb.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/staging/rtl8192u/r8192u_usb.ko $(RELEASE_DIR)/lib/modules/ || true
+	[ -e $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.ko ] && cp $(TARGET_DIR)/lib/modules/$(KERNEL_VER)/kernel/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.ko $(RELEASE_DIR)/lib/modules/ || true
+endif
+#
+#
+################################################################################
+#
+# wlan firmware
+#
+	if [ -e $(RELEASE_DIR)/lib/modules/r8188eu.ko ]; then \
+		install -d $(RELEASE_DIR)/etc/Wireless; \
+		cp -aR $(SKEL_ROOT)/firmware/Wireless/* $(RELEASE_DIR)/etc/Wireless/ ;\
+		cp -aR $(SKEL_ROOT)/firmware/rtlwifi $(RELEASE_DIR)/lib/firmware/ ; \
+		cp -aR $(SKEL_ROOT)/firmware/*.bin $(RELEASE_DIR)/lib/firmware/ ; \
+	fi
+#
+# modules.available
+#
+	cp -aR $(SKEL_ROOT)/release/modules.available_$(BOXARCH) $(RELEASE_DIR)/etc/modules.available
 #
 # lib usr/lib
 #
@@ -625,26 +664,30 @@ endif
 	chmod 755 $(RELEASE_DIR)/lib/*
 	ln -s /var/tuxbox/plugins/libfx2.so $(RELEASE_DIR)/lib/libfx2.so
 	cp -R $(TARGET_DIR)/usr/lib/* $(RELEASE_DIR)/usr/lib/
-	rm -rf $(RELEASE_DIR)/usr/lib/{engines,enigma2,gconv,libxslt-plugins,pkgconfig,python$(PYTHON_VER),sigc++-2.0}
+	rm -rf $(RELEASE_DIR)/usr/lib/{engines,gconv,libxslt-plugins,pkgconfig,python$(PYTHON_VER),sigc++-2.0}
 	rm -f $(RELEASE_DIR)/usr/lib/*.{a,o,la}
 	chmod 755 $(RELEASE_DIR)/usr/lib/*
 #
 # fonts
 #
-	if [ -e $(TARGET_DIR)/usr/share/fonts/neutrino.ttf ]; then \
-		cp -aR $(TARGET_DIR)/usr/share/fonts/neutrino.ttf $(RELEASE_DIR)/usr/share/fonts; \
-	fi
-	if [ -e $(TARGET_DIR)/usr/share/fonts/micron.ttf ]; then \
-		cp -aR $(TARGET_DIR)/usr/share/fonts/micron.ttf $(RELEASE_DIR)/usr/share/fonts; \
-	fi
-	if [ -e $(TARGET_DIR)/usr/share/fonts/DejaVuLGCSansMono-Bold.ttf ]; then \
-		cp -aR $(TARGET_DIR)/usr/share/fonts/DejaVuLGCSansMono-Bold.ttf $(RELEASE_DIR)/usr/share/fonts; \
-		ln -s /usr/share/fonts/DejaVuLGCSansMono-Bold.ttf $(RELEASE_DIR)/usr/share/fonts/tuxtxt.ttf; \
+	if [ -e $(TARGET_DIR)/share/fonts/ubuntu-l-webfont.ttf ]; then \
+		cp -aR $(TARGET_DIR)/share/fonts $(RELEASE_DIR)/share/; \
+	else \
+		if [ -e $(TARGET_DIR)/share/fonts/neutrino.ttf ]; then \
+			cp -aR $(TARGET_DIR)/share/fonts/neutrino.ttf $(RELEASE_DIR)/share/fonts; \
+		fi; \
+		if [ -e $(TARGET_DIR)/share/fonts/micron.ttf ]; then \
+			cp -aR $(TARGET_DIR)/share/fonts/micron.ttf $(RELEASE_DIR)/share/fonts; \
+		fi; \
+		if [ -e $(TARGET_DIR)/share/fonts/DejaVuLGCSansMono-Bold.ttf ]; then \
+			cp -aR $(TARGET_DIR)/share/fonts/DejaVuLGCSansMono-Bold.ttf $(RELEASE_DIR)/share/fonts; \
+			ln -s /share/fonts/DejaVuLGCSansMono-Bold.ttf $(RELEASE_DIR)/share/fonts/tuxtxt.ttf; \
+		fi; \
 	fi
 #
 # neutrino
 #
-	ln -sf /usr/share $(RELEASE_DIR)/usr/local/share
+	ln -sf /share $(RELEASE_DIR)/usr/local/share
 	cp $(TARGET_DIR)/usr/local/bin/neutrino $(RELEASE_DIR)/usr/local/bin/
 	cp $(TARGET_DIR)/usr/local/bin/pzapit $(RELEASE_DIR)/usr/local/bin/
 	cp $(TARGET_DIR)/usr/local/bin/sectionsdcontrol $(RELEASE_DIR)/usr/local/bin/
@@ -678,11 +721,12 @@ endif
 #
 # iso-codes
 #
-	[ -e $(TARGET_DIR)/usr/local/share/iso-codes ] && cp -aR $(TARGET_DIR)/usr/local/share/iso-codes $(RELEASE_DIR)/usr/share/ || true
+	[ -e $(TARGET_DIR)/usr/local/share/iso-codes ] && cp -aR $(TARGET_DIR)/usr/local/share/iso-codes $(RELEASE_DIR)/share/ || true
+	[ -e $(TARGET_DIR)/share/tuxbox/iso-codes ] && cp -aR $(TARGET_DIR)/share/tuxbox/iso-codes $(RELEASE_DIR)/share/tuxbox/ || true
 #
 # httpd/icons/locale/themes
 #
-	cp -aR $(TARGET_DIR)/usr/share/tuxbox/neutrino/* $(RELEASE_DIR)/usr/share/tuxbox/neutrino
+	cp -aR $(TARGET_DIR)/share/tuxbox/neutrino/* $(RELEASE_DIR)/share/tuxbox/neutrino
 #
 # backup/restore NMP
 #
@@ -692,26 +736,39 @@ endif
 # alsa
 #
 	if [ -e $(TARGET_DIR)/usr/share/alsa ]; then \
-		mkdir -p $(RELEASE_DIR)/usr/share/alsa/; \
-		mkdir $(RELEASE_DIR)/usr/share/alsa/cards/; \
-		mkdir $(RELEASE_DIR)/usr/share/alsa/pcm/; \
-		cp -dp $(TARGET_DIR)/usr/share/alsa/alsa.conf $(RELEASE_DIR)/usr/share/alsa/alsa.conf; \
-		cp $(TARGET_DIR)/usr/share/alsa/cards/aliases.conf $(RELEASE_DIR)/usr/share/alsa/cards/; \
-		cp $(TARGET_DIR)/usr/share/alsa/pcm/default.conf $(RELEASE_DIR)/usr/share/alsa/pcm/; \
-		cp $(TARGET_DIR)/usr/share/alsa/pcm/dmix.conf $(RELEASE_DIR)/usr/share/alsa/pcm/; \
+		mkdir -p $(RELEASE_DIR)/share/alsa/; \
+		mkdir $(RELEASE_DIR)/share/alsa/cards/; \
+		mkdir $(RELEASE_DIR)/share/alsa/pcm/; \
+		cp -dp $(TARGET_DIR)/usr/share/alsa/alsa.conf $(RELEASE_DIR)/share/alsa/alsa.conf; \
+		cp $(TARGET_DIR)/usr/share/alsa/cards/aliases.conf $(RELEASE_DIR)/share/alsa/cards/; \
+		cp $(TARGET_DIR)/usr/share/alsa/pcm/default.conf $(RELEASE_DIR)/share/alsa/pcm/; \
+		cp $(TARGET_DIR)/usr/share/alsa/pcm/dmix.conf $(RELEASE_DIR)/share/alsa/pcm/; \
 	fi
 #
 # xupnpd
 #
 	if [ -e $(TARGET_DIR)/usr/bin/xupnpd ]; then \
-		cp -aR $(TARGET_DIR)/usr/share/xupnpd $(RELEASE_DIR)/usr/share; \
-		mkdir -p $(RELEASE_DIR)/usr/share/xupnpd/playlists; \
+		cp -aR $(TARGET_DIR)/share/xupnpd $(RELEASE_DIR)/share; \
+		mkdir -p $(RELEASE_DIR)/share/xupnpd/playlists; \
+	fi
+#
+# mc
+#
+	if [ -e $(TARGET_DIR)/usr/bin/mc ]; then \
+		cp -aR $(TARGET_DIR)/usr/share/mc $(RELEASE_DIR)/share/; \
+		cp -af $(TARGET_DIR)/usr/libexec $(RELEASE_DIR)/usr/; \
 	fi
 #
 # lua
 #
-	if [ -d $(TARGET_DIR)/usr/share/lua ]; then \
-		cp -aR $(TARGET_DIR)/usr/share/lua $(RELEASE_DIR)/usr/share; \
+	if [ -d $(TARGET_DIR)/share/lua ]; then \
+		cp -aR $(TARGET_DIR)/share/lua $(RELEASE_DIR)/share; \
+	fi
+#
+# astra-sm
+#
+	if [ -d $(TARGET_DIR)/usr/bin/astra ]; then \
+		cp -aR $(TARGET_DIR)/usr/share/astra $(RELEASE_DIR)/usr/share; \
 	fi
 #
 # plugins
@@ -719,12 +776,15 @@ endif
 	if [ -d $(TARGET_DIR)/var/tuxbox/plugins ]; then \
 		cp -af $(TARGET_DIR)/var/tuxbox/plugins $(RELEASE_DIR)/var/tuxbox/; \
 	fi
+	if [ -d $(TARGET_DIR)/lib/tuxbox/plugins ]; then \
+		cp -af $(TARGET_DIR)/lib/tuxbox/plugins $(RELEASE_DIR)/lib/tuxbox/; \
+	fi
 	if [ -e $(RELEASE_DIR)/var/tuxbox/plugins/tuxwetter.so ]; then \
 		cp -rf $(TARGET_DIR)/var/tuxbox/config/tuxwetter $(RELEASE_DIR)/var/tuxbox/config; \
 	fi
-	if [ -e $(RELEASE_DIR)/var/tuxbox/plugins/soko.so ]; then \
-		cp -rf $(TARGET_DIR)/usr/share/tuxbox/sokoban $(RELEASE_DIR)/var/tuxbox/plugins; \
-		ln -s /var/tuxbox/plugins/sokoban $(RELEASE_DIR)/usr/share/tuxbox/sokoban; \
+	if [ -e $(RELEASE_DIR)/var/tuxbox/plugins/sokoban.so ]; then \
+		cp -rf $(TARGET_DIR)/share/tuxbox/sokoban $(RELEASE_DIR)/var/tuxbox/plugins; \
+		ln -s /var/tuxbox/plugins/sokoban $(RELEASE_DIR)/share/tuxbox/sokoban; \
 	fi
 #
 # shairport
@@ -754,28 +814,28 @@ ifeq ($(BOXTYPE), $(filter $(BOXTYPE), ufs910 ufs922))
 	rm -f $(RELEASE_DIR)/sbin/jfs_mkfs
 	rm -f $(RELEASE_DIR)/sbin/mkfs.jfs
 	rm -f $(RELEASE_DIR)/sbin/jfs_tune
+	rm -f $(RELEASE_DIR)/etc/ssl/certs/ca-certificates.crt
 endif
 	rm -f $(RELEASE_DIR)/usr/lib/lua/5.2/*.la
 	rm -rf $(RELEASE_DIR)/lib/autofs
 	rm -f $(RELEASE_DIR)/lib/libSegFault*
+	rm -f $(RELEASE_DIR)/lib/libstdc++.*-gdb.py
 	rm -f $(RELEASE_DIR)/lib/libthread_db*
 	rm -f $(RELEASE_DIR)/lib/libanl*
 	rm -rf $(RELEASE_DIR)/lib/modules/$(KERNEL_VER)
 	rm -rf $(RELEASE_DIR)/usr/lib/alsa
-	rm -f $(RELEASE_DIR)/usr/lib/libc.so
 	rm -rf $(RELEASE_DIR)/usr/lib/glib-2.0
 	rm -rf $(RELEASE_DIR)/usr/lib/cmake
+	rm -f $(RELEASE_DIR)/usr/lib/*.py
+	rm -f $(RELEASE_DIR)/usr/lib/libc.so
 	rm -f $(RELEASE_DIR)/usr/lib/libglcdskin.so*
 	rm -f $(RELEASE_DIR)/usr/lib/xml2Conf.sh
 	rm -f $(RELEASE_DIR)/usr/lib/libfontconfig*
-	rm -f $(RELEASE_DIR)/usr/lib/libtermcap*
-	rm -f $(RELEASE_DIR)/usr/lib/libmenu*
-	rm -f $(RELEASE_DIR)/usr/lib/libpanel*
 	rm -f $(RELEASE_DIR)/usr/lib/libdvdcss*
 	rm -f $(RELEASE_DIR)/usr/lib/libdvdnav*
 	rm -f $(RELEASE_DIR)/usr/lib/libdvdread*
-	rm -f $(RELEASE_DIR)/usr/lib/libncurses*
 	rm -f $(RELEASE_DIR)/usr/lib/libcurses.so
+	[ ! -e $(RELEASE_DIR)/usr/bin/mc ] && rm -f $(RELEASE_DIR)/usr/lib/libncurses* || true
 	rm -f $(RELEASE_DIR)/usr/lib/libthread_db*
 	rm -f $(RELEASE_DIR)/usr/lib/libanl*
 	rm -f $(RELEASE_DIR)/usr/lib/libopkg*
@@ -785,12 +845,18 @@ endif
 	rm -f $(RELEASE_DIR)/bin/streamproxy
 	rm -f $(RELEASE_DIR)/bin/libstb-hal-test
 	rm -f $(RELEASE_DIR)/sbin/ldconfig
+	rm -f $(RELEASE_DIR)/usr/bin/pic2m2v
+ifeq ($(BOXARCH), arm)
+	rm -rf $(RELEASE_DIR)/dev.static
+	rm -rf $(RELEASE_DIR)/ram
+	rm -rf $(RELEASE_DIR)/root
+endif
 #
 # The main target depends on the model.
 # IMPORTANT: it is assumed that only one variable is set. Otherwise the target name won't be resolved.
 #
-$(D)/neutrino_release: \
-$(D)/%neutrino_release: neutrino_release_base neutrino_release_$(BOXTYPE)
+$(D)/neutrino-release: \
+$(D)/%neutrino-release: neutrino-release-base neutrino-release-$(BOXTYPE)
 	$(TUXBOX_CUSTOMIZE)
 	@touch $@
 #
@@ -816,29 +882,21 @@ $(D)/%neutrino_release: neutrino_release_base neutrino_release_$(BOXTYPE)
 	ln -s /tmp $(RELEASE_DIR)/var/run
 	ln -s /tmp $(RELEASE_DIR)/var/tmp
 #
-	mv -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/scan.jpg $(RELEASE_DIR)/var/boot/
-	ln -s /var/boot/scan.jpg $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/
-	mv -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/mp3.jpg $(RELEASE_DIR)/var/boot/
-	ln -s /var/boot/mp3.jpg $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/
-	rm -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/mp3-?.jpg
-	mv -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/shutdown.jpg $(RELEASE_DIR)/var/boot/
-	ln -s /var/boot/shutdown.jpg $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/
-	mv -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/radiomode.jpg $(RELEASE_DIR)/var/boot/
-	ln -s /var/boot/radiomode.jpg $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/
-	mv -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/start.jpg $(RELEASE_DIR)/var/boot/
-	ln -s /var/boot/start.jpg $(RELEASE_DIR)/usr/share/tuxbox/neutrino/icons/
+	mv -f $(RELEASE_DIR)/share/tuxbox/neutrino/icons/scan.jpg $(RELEASE_DIR)/var/boot/
+	ln -s /var/boot/scan.jpg $(RELEASE_DIR)/share/tuxbox/neutrino/icons/
+	mv -f $(RELEASE_DIR)/share/tuxbox/neutrino/icons/mp3.jpg $(RELEASE_DIR)/var/boot/
+	ln -s /var/boot/mp3.jpg $(RELEASE_DIR)/share/tuxbox/neutrino/icons/
+	rm -f $(RELEASE_DIR)/share/tuxbox/neutrino/icons/mp3-?.jpg
+	mv -f $(RELEASE_DIR)/share/tuxbox/neutrino/icons/shutdown.jpg $(RELEASE_DIR)/var/boot/
+	ln -s /var/boot/shutdown.jpg $(RELEASE_DIR)/share/tuxbox/neutrino/icons/
+	mv -f $(RELEASE_DIR)/share/tuxbox/neutrino/icons/radiomode.jpg $(RELEASE_DIR)/var/boot/
+	ln -s /var/boot/radiomode.jpg $(RELEASE_DIR)/share/tuxbox/neutrino/icons/
+	mv -f $(RELEASE_DIR)/share/tuxbox/neutrino/icons/start.jpg $(RELEASE_DIR)/var/boot/
+	ln -s /var/boot/start.jpg $(RELEASE_DIR)/share/tuxbox/neutrino/icons/
 #
-	rm -f $(RELEASE_DIR)/bin/pic2m2v
-	rm -f $(RELEASE_DIR)/usr/lib/*.py
-	rm -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/httpd/images/rc_cst_v?.*
-ifneq ($(BOXTYPE), $(filter $(BOXTYPE), spark spark7162))
-	rm -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/httpd/images/rc_spark_new.jpg
-	rm -f $(RELEASE_DIR)/usr/share/tuxbox/neutrino/httpd/images/rc_spark_old.jpg
-endif
+# linux-strip all
 #
-# sh4-linux-strip all
-#
-ifneq ($(OPTIMIZATIONS), $(filter $(OPTIMIZATIONS), kerneldebug debug))
+ifneq ($(OPTIMIZATIONS), $(filter $(OPTIMIZATIONS), kerneldebug debug normal))
 	find $(RELEASE_DIR)/ -name '*' -exec $(TARGET)-strip --strip-unneeded {} &>/dev/null \;
 endif
 	@echo "***************************************************************"
@@ -847,7 +905,7 @@ endif
 	@echo -e "\033[00m"
 	@echo "***************************************************************"
 #
-# release-clean
+# neutrino-release-clean
 #
 neutrino-release-clean:
-	rm -f $(D)/neutrino_release
+	rm -f $(D)/neutrino-release

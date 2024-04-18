@@ -52,13 +52,12 @@ $(STL_ARCHIVE)/stlinux24-sh4-glibc-dev-$(GLIBC_VER).sh4.rpm \
 $(STL_ARCHIVE)/stlinux24-sh4-libgcc-$(LIBGCC_VER).sh4.rpm \
 $(STL_ARCHIVE)/stlinux24-sh4-libstdc++-$(LIBGCC_VER).sh4.rpm \
 $(STL_ARCHIVE)/stlinux24-sh4-libstdc++-dev-$(LIBGCC_VER).sh4.rpm
-	unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/devkit/sh4 $(CROSS_DIR) \
+	$(SCRIPTS_DIR)/unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/devkit/sh4 $(CROSS_DIR) \
 		$^
 	touch $(D)/$(notdir $@)
 
 CROSSTOOL = crosstool
 crosstool: directories driver-symlink \
-$(HOST_DIR)/bin/unpack-rpm.sh \
 crosstool-rpminstall
 	@touch $(D)/$(notdir $@)
 
@@ -95,7 +94,7 @@ HOST_U_BOOT_TOOLS_VER = 1.3.1_stm24-9
 host_u_boot_tools: \
 $(STL_ARCHIVE)/stlinux24-host-u-boot-tools-$(HOST_U_BOOT_TOOLS_VER).i386.rpm
 	$(START_BUILD)
-	unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/host/bin $(HOST_DIR)/bin \
+	$(SCRIPTS_DIR)/unpack-rpm.sh $(BUILD_TMP) $(STM_RELOCATE)/host/bin $(HOST_DIR)/bin \
 		$^
 	@touch $(D)/$(notdir $@)
 	@echo -e "Build of $(TERM_GREEN_BOLD)$@$(PKG_VER) $(TERM_NORMAL)completed."; echo
@@ -117,7 +116,7 @@ crosstool-ng: directories $(ARCHIVE)/$(CROSSTOOL_NG_SOURCE)
 	$(REMOVE)/crosstool-ng
 	$(UNTAR)/$(CROSSTOOL_NG_SOURCE)
 	set -e; unset CONFIG_SITE; cd $(BUILD_TMP)/crosstool-ng; \
-		cp -a $(PATCHES)/crosstool-ng-$(CROSSTOOL_NG_VER)-$(BOXARCH).config .config; \
+		cp -a $(PATCHES)/ct-ng/crosstool-ng-$(CROSSTOOL_NG_VER)-$(BOXARCH).config .config; \
 		NUM_CPUS=$$(expr `getconf _NPROCESSORS_ONLN` \* 2); \
 		MEM_512M=$$(awk '/MemTotal/ {M=int($$2/1024/512); print M==0?1:M}' /proc/meminfo); \
 		test $$NUM_CPUS -gt $$MEM_512M && NUM_CPUS=$$MEM_512M; \
@@ -140,10 +139,9 @@ crossmenuconfig: directories $(ARCHIVE)/$(CROSSTOOL_NG_SOURCE)
 	$(REMOVE)/crosstool-ng
 	$(UNTAR)/$(CROSSTOOL_NG_SOURCE)
 	set -e; unset CONFIG_SITE; cd $(BUILD_TMP)/crosstool-ng; \
-		cp -a $(PATCHES)/crosstool-ng-$(CROSSTOOL_NG_VER)-$(BOXARCH).config .config; \
+		cp -a $(PATCHES)/ct-ng/crosstool-ng-$(CROSSTOOL_NG_VER)-$(BOXARCH).config .config; \
 		test -f ./configure || ./bootstrap && \
 		./configure --enable-local; \
 		MAKELEVEL=0 make; \
 		chmod 0755 ct-ng; \
 		./ct-ng menuconfig
-

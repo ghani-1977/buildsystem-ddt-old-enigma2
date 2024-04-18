@@ -87,18 +87,13 @@ ATEVIO7500_PATCHES_24 = $(COMMON_PATCHES_24) \
 		linux-sh4-lmb_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-atevio7500_setup_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-stmmac_stm24_$(KERNEL_LABEL).patch
-ifeq ($(IMAGE), $(filter $(IMAGE), enigma2 enigma2-wlandriver))
-ATEVIO7500_PATCHES_24 += linux-sh4-atevio7500_mtdconcat_stm24_$(KERNEL_LABEL).patch
-endif
 
 HS7110_PATCHES_24 = $(COMMON_PATCHES_24) \
 		linux-sh4-lmb_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-hs7110_setup_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-stmmac_stm24_$(KERNEL_LABEL).patch \
-		$(if $(P0209),linux-sh4-i2c-stm-downgrade_stm24_$(KERNEL_LABEL).patch)
-ifeq ($(IMAGE), $(filter $(IMAGE), neutrino neutrino-wlandriver))
-HS7110_PATCHES_24 += linux-sh4-hs7110_mtdconcat_stm24_$(KERNEL_LABEL).patch
-endif
+		$(if $(P0209),linux-sh4-i2c-stm-downgrade_stm24_$(KERNEL_LABEL).patch) \
+		linux-sh4-hs7110_mtdconcat_stm24_$(KERNEL_LABEL).patch
 
 HS7119_PATCHES_24 = $(COMMON_PATCHES_24) \
 		linux-sh4-lmb_stm24_$(KERNEL_LABEL).patch \
@@ -110,10 +105,8 @@ HS7420_PATCHES_24 = $(COMMON_PATCHES_24) \
 		linux-sh4-lmb_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-hs7420_setup_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-stmmac_stm24_$(KERNEL_LABEL).patch \
-		$(if $(P0209),linux-sh4-i2c-stm-downgrade_stm24_$(KERNEL_LABEL).patch)
-ifeq ($(IMAGE), $(filter $(IMAGE), neutrino neutrino-wlandriver))
-HS7420_PATCHES_24 += linux-sh4-hs7420_mtdconcat_stm24_$(KERNEL_LABEL).patch
-endif
+		$(if $(P0209),linux-sh4-i2c-stm-downgrade_stm24_$(KERNEL_LABEL).patch) \
+		linux-sh4-hs7420_mtdconcat_stm24_$(KERNEL_LABEL).patch
 
 HS7429_PATCHES_24 = $(COMMON_PATCHES_24) \
 		linux-sh4-lmb_stm24_$(KERNEL_LABEL).patch \
@@ -125,10 +118,8 @@ HS7810A_PATCHES_24 = $(COMMON_PATCHES_24) \
 		linux-sh4-lmb_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-hs7810a_setup_stm24_$(KERNEL_LABEL).patch \
 		linux-sh4-stmmac_stm24_$(KERNEL_LABEL).patch \
-		$(if $(P0209),linux-sh4-i2c-stm-downgrade_stm24_$(KERNEL_LABEL).patch)
-ifeq ($(IMAGE), $(filter $(IMAGE), neutrino neutrino-wlandriver))
-HS7810A_PATCHES_24 += linux-sh4-hs7810a_mtdconcat_stm24_$(KERNEL_LABEL).patch
-endif
+		$(if $(P0209),linux-sh4-i2c-stm-downgrade_stm24_$(KERNEL_LABEL).patch) \
+		linux-sh4-hs7810a_mtdconcat_stm24_$(KERNEL_LABEL).patch
 
 HS7819_PATCHES_24 = $(COMMON_PATCHES_24) \
 		linux-sh4-lmb_stm24_$(KERNEL_LABEL).patch \
@@ -303,13 +294,13 @@ $(D)/kernel.do_prepare: $(PATCHES)/$(BUILD_CONFIG)/$(KERNEL_CONFIG) \
 	-rm $(KERNEL_DIR)/localversion*
 	echo "$(KERNEL_STM_LABEL)" > $(KERNEL_DIR)/localversion-stm
 ifeq ($(OPTIMIZATIONS), $(filter $(OPTIMIZATIONS), kerneldebug debug))
-	@echo "Using kernel debug"
+	@echo "Configuring kernel for debug."
 	@grep -v "CONFIG_PRINTK" "$(KERNEL_DIR)/.config" > $(KERNEL_DIR)/.config.tmp
 	cp $(KERNEL_DIR)/.config.tmp $(KERNEL_DIR)/.config
 	@echo "CONFIG_PRINTK=y" >> $(KERNEL_DIR)/.config
 	@echo "CONFIG_PRINTK_TIME=y" >> $(KERNEL_DIR)/.config
 endif
-ifeq ($(IMAGE), $(filter $(IMAGE), enigma2-wlandriver neutrino-wlandriver))
+ifeq ($(IMAGE), $(filter $(IMAGE), neutrino-wlandriver))
 	@echo "Using kernel wireless"
 	@grep -v "CONFIG_WIRELESS" "$(KERNEL_DIR)/.config" > $(KERNEL_DIR)/.config.tmp
 	cp $(KERNEL_DIR)/.config.tmp $(KERNEL_DIR)/.config
@@ -412,7 +403,7 @@ $(D)/uboot: bootstrap $(ARCHIVE)/u-boot-$(UBOOT_VER).tar.bz2
 	$(REMOVE)/u-boot-$(UBOOT_VER)
 	$(UNTAR)/u-boot-$(UBOOT_VER).tar.bz2
 	set -e; cd $(BUILD_TMP)/u-boot-$(UBOOT_VER); \
-		$(call post_patch,$(UBOOT_PATCH)); \
+		$(call apply_patches,$(UBOOT_PATCH)); \
 		$(MAKE) $(BOXTYPE)_config; \
 		$(MAKE)
 #	$(REMOVE)/u-boot-$(UBOOT_VER)

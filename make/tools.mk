@@ -3,7 +3,12 @@
 #
 tools-clean:
 	rm -f $(D)/tools-*
-	-$(MAKE) -C $(APPS_DIR)/tools/aio-grab distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/aio-grab-$(BOXARCH) distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/satfind distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/showiframe-$(BOXARCH) distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/minimon distclean
+	-$(MAKE) -C $(APPS_DIR)/tools/spf_tool distclean
+ifeq ($(BOXARCH), sh4)
 	-$(MAKE) -C $(APPS_DIR)/tools/devinit distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/evremote2 distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/fp_control distclean
@@ -15,16 +20,6 @@ tools-clean:
 ifeq ($(BOXTYPE), $(filter $(BOXTYPE), ipbox55 ipbox99 ipbox9900 cuberevo cuberevo_mini cuberevo_mini2 cuberevo_250hd cuberevo_2000hd cuberevo_3000hd))
 	-$(MAKE) -C $(APPS_DIR)/tools/ipbox_eeprom distclean
 endif
-ifeq ($(MEDIAFW), $(filter $(MEDIAFW), eplayer3 gst-eplayer3))
-	-$(MAKE) -C $(APPS_DIR)/tools/libeplayer3 distclean
-endif
-ifeq ($(IMAGE), $(filter $(IMAGE), enigma2 enigma2-wlandriver))
-	-$(MAKE) -C $(APPS_DIR)/tools/libmme_host distclean
-	-$(MAKE) -C $(APPS_DIR)/tools/libmme_image distclean
-endif
-	-$(MAKE) -C $(APPS_DIR)/tools/minimon distclean
-	-$(MAKE) -C $(APPS_DIR)/tools/showiframe distclean
-	-$(MAKE) -C $(APPS_DIR)/tools/spf_tool distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/stfbcontrol distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/streamproxy distclean
 ifeq ($(BOXTYPE), $(filter $(BOXTYPE), tf7700))
@@ -34,6 +29,7 @@ endif
 	-$(MAKE) -C $(APPS_DIR)/tools/ustslave distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/vfdctl distclean
 	-$(MAKE) -C $(APPS_DIR)/tools/wait4button distclean
+endif
 ifneq ($(wildcard $(APPS_DIR)/tools/own-tools),)
 	-$(MAKE) -C $(APPS_DIR)/tools/own-tools distclean
 endif
@@ -43,7 +39,7 @@ endif
 #
 $(D)/tools-aio-grab: $(D)/bootstrap $(D)/libpng $(D)/libjpeg
 	$(START_BUILD)
-	set -e; cd $(APPS_DIR)/tools/aio-grab; \
+	set -e; cd $(APPS_DIR)/tools/aio-grab-$(BOXARCH); \
 		$(CONFIGURE_TOOLS) CPPFLAGS="$(CPPFLAGS) -I$(DRIVER_DIR)/bpamem" \
 			--prefix= \
 		; \
@@ -192,8 +188,6 @@ $(D)/tools-libmme_host: $(D)/bootstrap $(D)/driver
 	set -e; cd $(APPS_DIR)/tools/libmme_host; \
 		$(CONFIGURE_TOOLS) \
 			--prefix= \
-			$(if $(MULTICOM324), --enable-multicom324) \
-			$(if $(MULTICOM406), --enable-multicom406) \
 		; \
 		$(MAKE) DRIVER_TOPDIR=$(DRIVER_DIR); \
 		$(MAKE) install DESTDIR=$(TARGET_DIR) DRIVER_TOPDIR=$(DRIVER_DIR)
@@ -226,11 +220,24 @@ $(D)/tools-minimon: $(D)/bootstrap $(D)/libjpeg_turbo
 	$(TOUCH)
 
 #
+# satfind
+#
+$(D)/tools-satfind: $(D)/bootstrap
+	$(START_BUILD)
+	set -e; cd $(APPS_DIR)/tools/satfind; \
+		$(CONFIGURE_TOOLS) \
+			--prefix= \
+		; \
+		$(MAKE); \
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
+	$(TOUCH)
+
+#
 # showiframe
 #
 $(D)/tools-showiframe: $(D)/bootstrap
 	$(START_BUILD)
-	set -e; cd $(APPS_DIR)/tools/showiframe; \
+	set -e; cd $(APPS_DIR)/tools/showiframe-$(BOXARCH); \
 		$(CONFIGURE_TOOLS) \
 			--prefix= \
 		; \
@@ -360,6 +367,9 @@ $(D)/tools-own-tools: $(D)/bootstrap $(D)/libcurl
 	$(TOUCH)
 
 TOOLS  = $(D)/tools-aio-grab
+TOOLS += $(D)/tools-satfind
+TOOLS += $(D)/tools-showiframe
+ifeq ($(BOXARCH), sh4)
 TOOLS += $(D)/tools-devinit
 TOOLS += $(D)/tools-evremote2
 TOOLS += $(D)/tools-fp_control
@@ -373,7 +383,6 @@ TOOLS += $(D)/tools-hotplug
 ifeq ($(BOXTYPE), $(filter $(BOXTYPE), ipbox55 ipbox99 ipbox9900 cuberevo cuberevo_mini cuberevo_mini2 cuberevo_250hd cuberevo_2000hd cuberevo_3000hd))
 TOOLS += $(D)/tools-ipbox_eeprom
 endif
-TOOLS += $(D)/tools-showiframe
 TOOLS += $(D)/tools-stfbcontrol
 TOOLS += $(D)/tools-streamproxy
 ifeq ($(BOXTYPE), $(filter $(BOXTYPE), tf7700))
@@ -383,12 +392,6 @@ endif
 TOOLS += $(D)/tools-ustslave
 TOOLS += $(D)/tools-vfdctl
 TOOLS += $(D)/tools-wait4button
-ifeq ($(IMAGE), $(filter $(IMAGE), enigma2 enigma2-wlandriver))
-TOOLS += $(D)/tools-libmme_host
-TOOLS += $(D)/tools-libmme_image
-endif
-ifeq ($(MEDIAFW), $(filter $(MEDIAFW), eplayer3 gst-eplayer3))
-TOOLS += $(D)/tools-libeplayer3
 endif
 ifneq ($(wildcard $(APPS_DIR)/tools/own-tools),)
 TOOLS += $(D)/tools-own-tools

@@ -11,6 +11,7 @@ find-%:
 toolcheck: $(TOOLCHECK) preqs
 	@echo "All required tools seem to be installed."
 	@echo
+ifeq ($(BOXARCH), sh4)
 	@for i in audio_7100 audio_7105 audio_7111 video_7100 video_7105 video_7109 video_7111; do \
 		if [ ! -e $(SKEL_ROOT)/boot/$$i.elf ]; then \
 			echo -e "\n    ERROR: One or more .elf files are missing in $(SKEL_ROOT)/boot!"; \
@@ -20,6 +21,7 @@ toolcheck: $(TOOLCHECK) preqs
 			echo; \
 		fi; \
 	done
+endif
 	@if test "$(subst /bin/,,$(shell readlink /bin/sh))" != bash; then \
 		echo "WARNING: /bin/sh is not linked to bash."; \
 		echo "         This configuration might work, but is not supported."; \
@@ -29,7 +31,7 @@ toolcheck: $(TOOLCHECK) preqs
 #
 # host_pkgconfig
 #
-HOST_PKGCONFIG_VER = 0.29.1
+HOST_PKGCONFIG_VER = 0.29.2
 HOST_PKGCONFIG_SOURCE = pkg-config-$(HOST_PKGCONFIG_VER).tar.gz
 
 $(ARCHIVE)/$(HOST_PKGCONFIG_SOURCE):
@@ -55,20 +57,16 @@ $(D)/host_pkgconfig: directories $(ARCHIVE)/$(HOST_PKGCONFIG_SOURCE)
 #
 # host_module_init_tools
 #
-HOST_MODULE_INIT_TOOLS_VER = 3.16
-HOST_MODULE_INIT_TOOLS_SOURCE = module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER).tar.bz2
+HOST_MODULE_INIT_TOOLS_VER = $(MODULE_INIT_TOOLS_VER)
+HOST_MODULE_INIT_TOOLS_SOURCE = $(MODULE_INIT_TOOLS_SOURCE)
 HOST_MODULE_INIT_TOOLS_PATCH = module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER).patch
-HOST_MODULE_INIT_TOOLS_HOST_PATCH = module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER).patch
-
-$(ARCHIVE)/$(HOST_MODULE_INIT_TOOLS_SOURCE):
-	$(WGET) ftp.europeonline.com/pub/linux/utils/kernel/module-init-tools/$(HOST_MODULE_INIT_TOOLS_SOURCE)
 
 $(D)/host_module_init_tools: $(ARCHIVE)/$(HOST_MODULE_INIT_TOOLS_SOURCE)
 	$(START_BUILD)
 	$(REMOVE)/module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER)
 	$(UNTAR)/$(HOST_MODULE_INIT_TOOLS_SOURCE)
 	set -e; cd $(BUILD_TMP)/module-init-tools-$(HOST_MODULE_INIT_TOOLS_VER); \
-		$(call post_patch,$(HOST_MODULE_INIT_TOOLS_PATCH)); \
+		$(call apply_patches,$(HOST_MODULE_INIT_TOOLS_PATCH)); \
 		autoreconf -fi $(SILENT_OPT); \
 		./configure $(SILENT_OPT) \
 			--prefix=$(HOST_DIR) \
@@ -82,19 +80,16 @@ $(D)/host_module_init_tools: $(ARCHIVE)/$(HOST_MODULE_INIT_TOOLS_SOURCE)
 #
 # host_mtd_utils
 #
-HOST_MTD_UTILS_VER = 1.5.2
-HOST_MTD_UTILS_SOURCE = mtd-utils-$(HOST_MTD_UTILS_VER).tar.bz2
+HOST_MTD_UTILS_VER = $(MTD_UTILS_VER)
+HOST_MTD_UTILS_SOURCE = $(MTD_UTILS_SOURCE)
 HOST_MTD_UTILS_PATCH = host-mtd-utils-$(HOST_MTD_UTILS_VER).patch
-
-$(ARCHIVE)/$(HOST_MTD_UTILS_SOURCE):
-	$(WGET) ftp://ftp.infradead.org/pub/mtd-utils/$(HOST_MTD_UTILS_SOURCE)
 
 $(D)/host_mtd_utils: directories $(ARCHIVE)/$(HOST_MTD_UTILS_SOURCE)
 	$(START_BUILD)
 	$(REMOVE)/mtd-utils-$(HOST_MTD_UTILS_VER)
 	$(UNTAR)/$(HOST_MTD_UTILS_SOURCE)
 	set -e; cd $(BUILD_TMP)/mtd-utils-$(HOST_MTD_UTILS_VER); \
-		$(call post_patch,$(HOST_MTD_UTILS_PATCH)); \
+		$(call apply_patches,$(HOST_MTD_UTILS_PATCH)); \
 		$(MAKE) `pwd`/mkfs.jffs2 `pwd`/sumtool BUILDDIR=`pwd` WITHOUT_XATTR=1 DESTDIR=$(HOST_DIR); \
 		$(MAKE) install DESTDIR=$(HOST_DIR)/bin
 	$(REMOVE)/mtd-utils-$(HOST_MTD_UTILS_VER)
@@ -173,25 +168,66 @@ $(D)/host_mksquashfs: directories $(ARCHIVE)/$(LZMA_SOURCE) $(ARCHIVE)/$(HOST_MK
 	$(TOUCH)
 
 #
+# host_resize2fs
 #
-#
-$(HOST_DIR)/bin/unpack%.sh \
-$(HOST_DIR)/bin/get%.sh \
-$(HOST_DIR)/bin/opkg%sh: | directories
-	ln -sf $(SCRIPTS_DIR)/$(shell basename $@) $(HOST_DIR)/bin
+HOST_E2FSPROGS_VER = $(E2FSPROGS_VER)
+HOST_E2FSPROGS_SOURCE = $(E2FSPROGS_SOURCE)
+
+$(D)/host_resize2fs: $(ARCHIVE)/$(HOST_E2FSPROGS_SOURCE)
+	$(START_BUILD)
+	$(UNTAR)/$(HOST_E2FSPROGS_SOURCE)
+	set -e; cd $(BUILD_TMP)/e2fsprogs-$(HOST_E2FSPROGS_VER); \
+		./configure $(SILENT_OPT); \
+		$(MAKE)
+	install -D -m 0755 $(BUILD_TMP)/e2fsprogs-$(HOST_E2FSPROGS_VER)/resize/resize2fs $(HOST_DIR)/bin/
+	install -D -m 0755 $(BUILD_TMP)/e2fsprogs-$(HOST_E2FSPROGS_VER)/misc/mke2fs $(HOST_DIR)/bin/
+	ln -sf mke2fs $(HOST_DIR)/bin/mkfs.ext2
+	ln -sf mke2fs $(HOST_DIR)/bin/mkfs.ext3
+	ln -sf mke2fs $(HOST_DIR)/bin/mkfs.ext4
+	ln -sf mke2fs $(HOST_DIR)/bin/mkfs.ext4dev
+	install -D -m 0755 $(BUILD_TMP)/e2fsprogs-$(HOST_E2FSPROGS_VER)/e2fsck/e2fsck $(HOST_DIR)/bin/
+	ln -sf e2fsck $(HOST_DIR)/bin/fsck.ext2
+	ln -sf e2fsck $(HOST_DIR)/bin/fsck.ext3
+	ln -sf e2fsck $(HOST_DIR)/bin/fsck.ext4
+	ln -sf e2fsck $(HOST_DIR)/bin/fsck.ext4dev
+	$(REMOVE)/e2fsprogs-$(HOST_E2FSPROGS_VER)
+	$(TOUCH)
 
 #
+# cortex-strings
 #
+CORTEX_STRINGS_VER = 48fd30c
+CORTEX_STRINGS_SOURCE = cortex-strings-$(CORTEX_STRINGS_VER).tar.bz2
+CORTEX_STRINGS_URL = http://git.linaro.org/git-ro/toolchain/cortex-strings.git
+
+$(ARCHIVE)/cortex-strings-$(CORTEX_STRINGS_VER).tar.bz2:
+	$(SCRIPTS_DIR)/get-git-archive.sh $(CORTEX_STRINGS_URL) $(CORTEX_STRINGS_VER) $(notdir $@) $(ARCHIVE)
+
+$(D)/cortex-strings: $(ARCHIVE)/cortex-strings-$(CORTEX_STRINGS_VER).tar.bz2 directories
+	$(START_BUILD)
+	$(REMOVE)/cortex-strings-$(CORTEX_STRINGS_VER)
+	$(UNTAR)/$(CORTEX_STRINGS_SOURCE)
+	set -e; cd $(BUILD_TMP)/cortex-strings-$(CORTEX_STRINGS_VER); \
+		./autogen.sh; \
+		$(MAKE_OPTS) \
+		./configure \
+			--build=$(BUILD) \
+			--host=$(TARGET) \
+			--prefix=/usr \
+			--disable-shared \
+			--enable-static \
+		; \
+		$(MAKE); \
+		$(MAKE) install DESTDIR=$(TARGET_DIR)
+	$(REWRITE_LIBTOOL)/libcortex-strings.la
+	$(REMOVE)/cortex-strings-$(CORTEX_STRINGS_VER)
+	$(TOUCH)
+
+#
+# bootstrap
 #
 BOOTSTRAP  = directories
 BOOTSTRAP += $(D)/ccache
-BOOTSTRAP += $(HOST_DIR)/bin/opkg.sh
-BOOTSTRAP += $(HOST_DIR)/bin/opkg-chksvn.sh
-BOOTSTRAP += $(HOST_DIR)/bin/opkg-gitdescribe.sh
-BOOTSTRAP += $(HOST_DIR)/bin/opkg-find-requires.sh
-BOOTSTRAP += $(HOST_DIR)/bin/opkg-find-provides.sh
-BOOTSTRAP += $(HOST_DIR)/bin/opkg-module-deps.sh
-BOOTSTRAP += $(HOST_DIR)/bin/get-git-archive.sh
 BOOTSTRAP += $(CROSSTOOL)
 BOOTSTRAP += $(TARGET_DIR)/lib/libc.so.6
 BOOTSTRAP += $(D)/host_pkgconfig
@@ -199,19 +235,21 @@ BOOTSTRAP += $(D)/host_module_init_tools
 BOOTSTRAP += $(D)/host_mtd_utils
 BOOTSTRAP += $(D)/host_mkcramfs
 BOOTSTRAP += $(D)/host_mksquashfs
+ifeq ($(BOXARCH), arm)
+BOOTSTRAP += $(D)/host_resize2fs
+BOOTSTRAP += $(D)/cortex-strings
+endif
 
 $(D)/bootstrap: $(BOOTSTRAP)
 	@touch $@
 
 #
-#
+# system-tools
 #
 SYSTEM_TOOLS  = $(D)/busybox
 SYSTEM_TOOLS += $(D)/zlib
 SYSTEM_TOOLS += $(D)/sysvinit
-ifeq ($(BOXARCH), sh4)
 SYSTEM_TOOLS += $(D)/diverse-tools
-endif
 SYSTEM_TOOLS += $(D)/e2fsprogs
 SYSTEM_TOOLS += $(D)/jfsutils
 SYSTEM_TOOLS += $(D)/hdidle
@@ -225,23 +263,16 @@ SYSTEM_TOOLS += $(D)/udpxy
 SYSTEM_TOOLS += $(D)/dvbsnoop
 ifeq ($(BOXARCH), sh4)
 SYSTEM_TOOLS += $(D)/fbshot
-SYSTEM_TOOLS += $(D)/driver
+else
+SYSTEM_TOOLS += $(D)/ofgwrite
 endif
+SYSTEM_TOOLS += $(D)/driver
 
 $(D)/system-tools: $(SYSTEM_TOOLS) $(TOOLS)
 	@touch $@
 
 #
-# YAUD NONE
-#
-YAUD_NONE     = $(D)/bootstrap
-YAUD_NONE    += $(KERNEL)
-YAUD_NONE    += $(D)/system-tools
-
-yaud-none: $(YAUD_NONE)
-	@touch $(D)/$(notdir $@)
-
-#
+# preqs
 #
 #
 $(DRIVER_DIR):
@@ -289,7 +320,7 @@ directories:
 	install -d $(BOOT_DIR)
 	install -d $(HOST_DIR)
 	install -d $(HOST_DIR)/{bin,lib,share}
-	install -d $(TARGET_DIR)/{bin,boot,etc,lib,sbin,usr,var}
+	install -d $(TARGET_DIR)/{bin,boot,etc,lib,sbin,share,usr,var}
 	install -d $(TARGET_DIR)/etc/{init.d,mdev,network,rc.d}
 	install -d $(TARGET_DIR)/etc/rc.d/{rc0.d,rc6.d}
 	ln -sf ../init.d $(TARGET_DIR)/etc/rc.d/init.d
@@ -326,4 +357,3 @@ $(D)/ccache:
 
 # hack to make sure they are always copied
 PHONY += ccache
-

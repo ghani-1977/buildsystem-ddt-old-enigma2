@@ -13,39 +13,20 @@ fi
 ##############################################
 
 if [ "$1" == -h ] || [ "$1" == --help ]; then
-	echo "Parameter 1: target system (1-36)"
-	echo "Parameter 2: kernel (1-2)"
+	echo "Parameter 1: target system (1-38)"
+	echo "Parameter 2: kernel (1-2) for sh4 cpu"
 	echo "Parameter 3: optimization (1-4)"
-	echo "Parameter 4: player (1-2)"
-	echo "Parameter 5: Media Framework (1-4)"
-	echo "Parameter 6: External LCD support (1-3)"
-	echo "Parameter 7: Image (Enigma=1/2 Neutrino=3/4 (1-4)"
+	echo "Parameter 4: Media Framework (1-2)"
+	echo "Parameter 5: Image Neutrino (1-2)"
+	echo "Parameter 6: Neutrino variant (1-5)"
+	echo "Parameter 7: External LCD support (1-3)"
 	exit
 fi
 
 ##############################################
 
-CURDIR=`pwd`
-echo -ne "\n    Checking the .elf files in $CURDIR/root/boot..."
-set='audio_7100 audio_7105 audio_7111 video_7100 video_7105 video_7109 video_7111'
-for i in $set;
-do
-	if [ ! -e $CURDIR/root/boot/$i.elf ]; then
-		echo -e "\n    ERROR: One or more .elf files are missing in ./root/boot!"
-		echo "           ($i.elf is one of them)"
-		echo
-		echo "    Correct this and retry."
-		echo
-		exit
-	fi
-done
-echo " [OK]"
-echo
-
-##############################################
-
 case $1 in
-	[1-9] | 1[0-9] | 2[0-9] | 3[0-7]) REPLY=$1;;
+	[1-9] | 1[0-9] | 2[0-9] | 3[0-8]) REPLY=$1;;
 	*)
 		echo "Target receivers:"
 		echo
@@ -74,7 +55,7 @@ case $1 in
 		echo "   27)  Spark           29)  AM520"
 		echo "   28)  Spark7162       30)  AM530"
 		echo
-		echo "  Various"
+		echo "  Various sh4-based receivers"
 		echo "   31)  Edision Argus VIP1 v1 [ single tuner + 2 CI + 2 USB ]"
 		echo "   32)  SpiderBox HL-101"
 		echo "   33)  B4Team ADB 5800S"
@@ -82,9 +63,12 @@ case $1 in
 		echo "   35)  SagemCom 88 series"
 		echo "   36)  Ferguson Ariva @Link 200"
 		echo
-		echo "   37)  armbox for internal testing"
+		echo "  arm-based receivers"
+		echo "   37)  Mutant HD51"
+		echo "   38)  VU Solo 4k"
+		echo "   "
 		echo
-		read -p "Select target (1-37)? ";;
+		read -p "Select target (1-38)? ";;
 esac
 
 case "$REPLY" in
@@ -124,11 +108,73 @@ case "$REPLY" in
 	34) BOXARCH="sh4";BOXTYPE="vitamin_hd5000";;
 	35) BOXARCH="sh4";BOXTYPE="sagemcom88";;
 	36) BOXARCH="sh4";BOXTYPE="arivalink200";;
-	37) BOXARCH="arm";BOXTYPE="armbox";;
-	 *) BOXARCH="sh4";BOXTYPE="atevio7500";;
+	37) BOXARCH="arm";BOXTYPE="hd51";;
+	38) BOXARCH="arm";BOXTYPE="vusolo4k";;
+	 *) BOXARCH="arm";BOXTYPE="hd51";;
 esac
 echo "BOXARCH=$BOXARCH" > config
 echo "BOXTYPE=$BOXTYPE" >> config
+
+##############################################
+
+if [ $BOXTYPE == 'hd51' ]; then
+
+		echo -e "\n*** boxmode=1 (Standard) ***"
+		echo -e "+++ Features +++"
+		echo -e "3840x2160p60 10-bit HEVC, 3840x2160p60 8-bit VP9, 1920x1080p60 8-bit AVC,\nMAIN only (no PIP), Limited display usages, UHD only (no SD),\nNo multi-PIP, No transcoding"
+		echo -e "--- Restrictions ---"
+		echo -e "Decoder 0: 3840x2160p60 10-bit HEVC, 3840x2160p60 8-bit VP9, 1920x1080p60 8-bit AVC"
+		echo -e "OSD Grafic 0: 1080p60 32 bit ARGB"
+		echo -e "Display 0 Encode Restrictions: 3840x2160p60 12-bit 4:2:0 (HDMI),\n3840x2160p60 12-bit 4:2:2 (HDMI), 3840x2160p60 8-bit 4:4:4 (HDMI),\n1920x1080p60 (component), Only one display format at a time"
+		echo -e "\n*** boxmode=12 (Experimental) ***"
+		echo -e "+++ Features +++"
+		echo -e "3840x2160p50 10-bit decode for MAIN, 1080p25/50i PIP support,\n UHD display only, No SD display, No transcoding"
+		echo -e "--- Restrictions ---"
+		echo -e "Decoder 0: 3840x2160p50 10-bit HEVC, 3840x2160p50 8-bit VP9,\n1920x1080p50 8-bit AVC/MPEG"
+		echo -e "Decoder 1: 1920x1080p25/50i 10-bit HEVC, 1920x1080p25/50i 8-bit VP9/AVC/MPEG2, 3840x2160p50"
+		echo -e "OSD Graphic 0 (UHD): 1080p50 32-bit ARGB"
+		echo -e "Window 0 (MAIN/UHD): Limited display capabilities, 1080i50 10-bit de-interlacing"
+		echo -e "Window 1 (PIP/UHD): Up to 1/2 x 1/2 screen display, 576i50 de-interlacing"
+		echo -e "Display 0 (UHD) Encode Restrictions: 3840x2160p50"
+
+case $2 in
+	[1-2]) REPLY=$2;;
+	*)	echo -e "\nBoxmode:"
+		echo "   1)   1     (default)"
+		echo "   2)  12 PIP (PIP not supported by neutrino yet)"
+		read -p "Select mode (1-2)? ";;
+esac
+
+case "$REPLY" in
+	1)  HD51_BOXMODE="1";;
+	2)  HD51_BOXMODE="12";;
+	*)  HD51_BOXMODE="1";;
+esac
+echo "HD51_BOXMODE=$HD51_BOXMODE" >> config
+fi
+
+##############################################
+
+if [ $BOXARCH == "sh4" ]; then
+
+##############################################
+
+CURDIR=`pwd`
+echo -ne "\n    Checking the .elf files in $CURDIR/root/boot..."
+set='audio_7100 audio_7105 audio_7111 video_7100 video_7105 video_7109 video_7111'
+for i in $set;
+do
+	if [ ! -e $CURDIR/root/boot/$i.elf ]; then
+		echo -e "\n    ERROR: One or more .elf files are missing in ./root/boot!"
+		echo "           ($i.elf is one of them)"
+		echo
+		echo "    Correct this and retry."
+		echo
+		exit
+	fi
+done
+echo " [OK]"
+echo
 
 ##############################################
 
@@ -146,6 +192,10 @@ case "$REPLY" in
 	*)  KERNEL_STM="p0217";;
 esac
 echo "KERNEL_STM=$KERNEL_STM" >> config
+
+##############################################
+
+fi
 
 ##############################################
 
@@ -172,47 +222,63 @@ echo "OPTIMIZATIONS=$OPTIMIZATIONS" >> config
 
 case $4 in
 	[1-2]) REPLY=$4;;
-	*)	echo -e "\nPlayer:"
-		echo "   1)  Player 191 (stmfb-3.1_stm24_0104, for internal testing)"
-		echo "   2)  Player 191 (stmfb-3.1_stm24_0104, recommended)"
-		read -p "Select player (1-2)? ";;
-esac
-
-case "$REPLY" in
-	1)	echo "PLAYER_VER=191_test" >> config
-		echo "MULTICOM_VER=324" >> config
-		;;
-	2)	echo "PLAYER_VER=191" >> config
-		echo "MULTICOM_VER=324" >> config
-		;;
-	*) ;;
-esac
-
-##############################################
-
-case $5 in
-	[1-4]) REPLY=$5;;
 	*)	echo -e "\nMedia Framework:"
-		echo "   1) eplayer3"
+		echo "   1) libeplayer3"
 		echo "   2) gstreamer"
-		echo "   3) use built-in       (required for Neutrino)"
-		echo "   4) gstreamer+eplayer3 (required for OpenPLi)"
-		read -p "Select media framework (1-4)? ";;
+		read -p "Select media framework (1-2)? ";;
 esac
 
 case "$REPLY" in
-	1) MEDIAFW="eplayer3";;
+	1) MEDIAFW="buildinplayer";;
 	2) MEDIAFW="gstreamer";;
-	3) MEDIAFW="buildinplayer";;
-	4) MEDIAFW="gst-eplayer3";;
 	*) MEDIAFW="buildinplayer";;
 esac
 echo "MEDIAFW=$MEDIAFW" >> config
 
 ##############################################
 
+case $5 in
+	[1-2]) REPLY=$5;;
+	*)	echo -e "\nWhich Image do you want to build:"
+		echo "   1)  Neutrino"
+		echo "   2)  Neutrino (includes WLAN drivers sh4)"
+		read -p "Select Image to build (1-2)? ";;
+esac
+
+case "$REPLY" in
+	1) IMAGE="neutrino";;
+	2) IMAGE="neutrino-wlandriver";;
+	*) IMAGE="neutrino";;
+esac
+echo "IMAGE=$IMAGE" >> config
+
+##############################################
+
 case $6 in
-	[1-3]) REPLY=$6;;
+	[1-5]) REPLY=$6;;
+	*)	echo -e "\nWhich Neutrino variant do you want to build?:"
+		echo "   1)  neutrino-mp-ddt    [ arm/sh4 ]"
+		echo "   2)  neutrino-mp-max    [ arm     ]"
+		echo "   3)  neutrino-mp-ni     [ arm     ]"
+		echo "   4)  neutrino-mp-tangos [ arm/sh4 ]"
+		echo "   5)  neutrino-hd2       [ arm/sh4 ]"
+		read -p "Select Image to build (1-5)? ";;
+esac
+
+case "$REPLY" in
+	1) FLAVOUR="neutrino-mp-ddt";;
+	2) FLAVOUR="neutrino-mp-max";;
+	3) FLAVOUR="neutrino-mp-ni";;
+	4) FLAVOUR="neutrino-mp-tangos";;
+	5) FLAVOUR="neutrino-hd2";;
+	*) FLAVOUR="neutrino-mp-ddt";;
+esac
+echo "FLAVOUR=$FLAVOUR" >> config
+
+##############################################
+
+case $7 in
+	[1-3]) REPLY=$7;;
 	*)	echo -e "\nExternal LCD support:"
 		echo "   1)  No external LCD"
 		echo "   2)  graphlcd for external LCD"
@@ -229,43 +295,19 @@ esac
 echo "EXTERNAL_LCD=$EXTERNAL_LCD" >> config
 
 ##############################################
-
-case $7 in
-	[1-4]) REPLY=$7;;
-	*)	echo -e "\nWhich Image do you want to build:"
-		echo "   1)  Enigma2"
-		echo "   2)  Enigma2  (includes WLAN drivers)"
-		echo "   3)  Neutrino"
-		echo "   4)  Neutrino (includes WLAN drivers)"
-		read -p "Select Image to build (1-4)? ";;
-esac
-
-case "$REPLY" in
-	1) IMAGE="enigma2";;
-	2) IMAGE="enigma2-wlandriver";;
-	3) IMAGE="neutrino";;
-	4) IMAGE="neutrino-wlandriver";;
-	*) IMAGE="neutrino";;
-esac
-echo "IMAGE=$IMAGE" >> config
-
-##############################################
 echo " "
 make printenv
-echo " "
 ##############################################
-echo "Your build environment is ready :-)"
 echo "Your next step could be:"
-case "$IMAGE" in
-		neutrino*)
-		echo "  make yaud-neutrino-mp-cst-next"
-		echo "  make yaud-neutrino-mp-cst-next-plugins"
-		echo "  make yaud-neutrino-mp-cst-next-ni"
-		echo "  make yaud-neutrino-mp-cst-next-ni-plugins"
-		echo "  make yaud-neutrino-hd2"
-		echo "  make yaud-neutrino-hd2-plugins";;
-		enigma2*)
-		echo "  make yaud-enigma2";;
-		*)
+case "$FLAVOUR" in
+	neutrino-mp*)
+		echo "  make neutrino-mp"
+		echo "  make neutrino-mp-plugins";;
+	neutrino-hd2*)
+		echo "  make neutrino-hd2"
+		echo "  make neutrino-hd2-plugins";;
+	*)
+		echo "  make flashimage"
+		echo "  make ofgimage";;
 esac
 echo " "
